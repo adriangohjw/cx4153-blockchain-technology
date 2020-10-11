@@ -46,23 +46,47 @@ contract Exchange is owned {
 
   mapping (address => uint) etherBalanceForAddress;
 
+	event LogDepositEther(address accountAddress, uint amount);
+	event LogWithdrawEther(address accountAddress, uint amount);
+
+	constructor () public {
+		owner = msg.sender;
+	}
 
 	/////////////////////
 	/* FUNCTIONALITIES */
 	/////////////////////
 
-  function depositEther() public payable {
-		
+	// Address's Ether account management
+
+  function depositEther() public payable returns (uint totalEtherBalanceInWei) {
+		require(getEtherBalanceInWei() + msg.value >= getEtherBalanceInWei());
+
+		etherBalanceForAddress[msg.sender] += msg.value;
+
+		emit LogDepositEther(msg.sender, msg.value);
+
+		return getEtherBalanceInWei();
   }
 
-  function withdrawEther(uint amountInWei) public {
 
+  function withdrawEther(uint amountInWei) public returns (uint totalEtherBalanceInWei) {
+		require(amountInWei <= getEtherBalanceInWei());
+
+		etherBalanceForAddress[msg.sender] -= amountInWei;
+
+		msg.sender.transfer(amountInWei);
+
+		emit LogWithdrawEther(msg.sender, amountInWei);
+
+		return getEtherBalanceInWei();
   }
+
 
   function getEtherBalanceInWei() public view returns (uint) {
-		uint balanceInWei;
-		return balanceInWei;
+		return etherBalanceForAddress[msg.sender];
   }
+
 
   function depositToken(string memory symbolName, uint amount) public {
 
