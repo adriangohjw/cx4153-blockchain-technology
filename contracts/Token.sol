@@ -1,90 +1,67 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
 
+import "./owned.sol";
+
 ///////////////
 /* STANDARD ERC20 Token Interface */
 /* reference: https://eips.ethereum.org/EIPS/eip-20 */
 ///////////////
 
-contract Token {
+contract Token is owned {
 
-	function name() virtual public view returns (string memory);
+	string name;
+	string symbol;
+	uint8 decimals;
+	uint totalSupply;
+	
+	mapping (address => uint) balances;
 
-	function symbol() virtual public view returns (string memory);
+	// initialize token with 1 million tokens and allocate all to the token's creator
+	constructor(string memory _name, string memory _symbol, uint8 _decimals, uint _totalSupply) public {
+		name = _name;
+		symbol = _symbol;
+		decimals = _decimals;
+		totalSupply = _totalSupply;
 
-	function decimals() virtual public view returns (uint8);
+		owner = msg.sender;
+		balances[owner] = totalSupply;
+	}
 
-	function totalSupply() virtual public view returns (uint256);
-
-	function balanceOf(address _owner) virtual public view returns (uint256 balance);
-
-	function transfer(address _to, uint256 _value) virtual public returns (bool success);
-
-	function transferFrom(address _from, address _to, uint256 _value) virtual public returns (bool success);
-
-	function approve(address _spender, uint256 _value) virtual public returns (bool success);
-
-	function allowance(address _owner, address _spender) virtual public view returns (uint256 remaining);
-
-	event Transfer(address indexed _from, address indexed _to, uint256 _value);
-
-	event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-
-}
-
-contract ERC20Token is Token {
-
-	function name() virtual public view returns (string memory) {
-		string name;
+	function getName() public view returns (string memory) {
 		return name;
-	};
+	}
 
-	function symbol() virtual public view returns (string memory) {
-		string symbol;
+	function getSymbol() public view returns (string memory) {
 		return symbol;
-	};
+	}
 
-	function decimals() virtual public view returns (uint8) {
-		uint8 decimals;
+	function getDecimals() public view returns (uint8) {
 		return decimals;
-	};
+	}
 
-	function totalSupply() virtual public view returns (uint256) {
-		uint256 supply;
-		return supply;
-	};
+	function getTotalSupply() public view returns (uint256) {
+		return totalSupply;
+	}
 
-	function balanceOf(address _owner) virtual public view returns (uint256 balance) {
-		uint256 balance;
-		return balance;
-	};
+	function balanceOf(address _owner) public view returns (uint256 balance) {
+		return balances[_owner];
+	}
 
-	function transfer(address _to, uint256 _value) virtual public returns (bool success) {
-		bool success;
+	function transfer(address _to, uint256 _value) public returns (bool success) {
 		return success;
-	};
+	}
 
-	function transferFrom(address _from, address _to, uint256 _value) virtual public returns (bool success) {
-		bool success;
+	function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
 		return success;
-	};
+	}
 
-	function approve(address _spender, uint256 _value) virtual public returns (bool success) {
-		bool success;
+	function approve(address _spender, uint256 _value) public returns (bool success) {
 		return success;
-	};
+	}
 
-	function allowance(address _owner, address _spender) virtual public view returns (uint256 remaining) {
-		uint256 remaining;
+	function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
 		return remaining;
-	};
-
-	event Transfer(address indexed _from, address indexed _to, uint256 _value) {
-
-	};
-
-	event Approval(address indexed _owner, address indexed _spender, uint256 _value) {
-
-	};
+	}
 
 }
