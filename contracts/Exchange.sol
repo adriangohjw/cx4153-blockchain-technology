@@ -2,6 +2,7 @@
 pragma solidity >=0.4.22 <0.8.0;
 
 import "./owned.sol";
+import "./Token.sol";
 
 contract Exchange is owned {
 
@@ -42,16 +43,28 @@ contract Exchange is owned {
 
   }
 
+	mapping(uint8 => Token) tokens;
+	uint8 tokenIndex;	
+
   mapping (address => mapping(uint8 => uint)) tokenBalanceForAddress;
 
   mapping (address => uint) etherBalanceForAddress;
 
+	constructor () public {
+		owner = msg.sender;
+		tokenIndex = 1;
+	}
+
+	////////////
+	/* EVENTS */
+	////////////
+
 	event LogDepositEther(address accountAddress, uint amount);
 	event LogWithdrawEther(address accountAddress, uint amount);
 
-	constructor () public {
-		owner = msg.sender;
-	}
+	event LogDepositToken(string symbolName, address accountAddress, uint amount, uint timestamp);
+	event LogWithdrawToken(string symbolName, address accountAddress, uint amount, uint timestamp);
+	event LogAddToken(uint tokenIndex, string symbolName, address EC20TokenAddress, uint timestamp);
 
 	/////////////////////
 	/* FUNCTIONALITIES */
@@ -88,27 +101,72 @@ contract Exchange is owned {
   }
 
 
-  function depositToken(string memory symbolName, uint amount) public {
+	// Owner's AddToken ability
 
+	function addToken(string memory symbolName, address EC20TokenAddress) public onlyowner {
+		require(!hasToken(symbolName));
+		require(tokenIndex + 1 >= tokenIndex);
+
+		tokenIndex++;
+
+		tokens[tokenIndex].symbolName = symbolName;
+		tokens[tokenIndex].contractAddress = EC20TokenAddress;
+		
+		emit LogAddToken(tokenIndex, symbolName, EC20TokenAddress, block.timestamp);
   }
 
-  function withdrawToken(string memory symbolName, uint amount) public {
 
+	// Address's Tokens account management
+
+  function depositToken(string memory symbolName, uint amount) public returns (uint tokenBalance) {
+		require(hasToken(symbolName));
+		require(getBalanceForToken(symbolName) + amount >= getBalanceForToken(symbolName));
+
+		tokenIndex = getTokenIndex(symbolName);	
+		ERC20Interface token = ERC20Interface(tokens[tokenIndex].contractAddress);
+
+		tokenBalanceForAddress[msg.sender][tokenIndex] += amount;
+
+		emit LogDepositToken(symbolName, msg.sender, amount, block.timestamp);
+
+		return getBalanceForToken(symbolName);
   }
+
+
+  function withdrawToken(string memory symbolName, uint amount) public returns (uint tokenBalance) {	
+		require(hasToken(symbolName));
+		require(amount <= getBalanceForToken(symbolName));
+
+		tokenIndex = getTokenIndex(symbolName);	
+		ERC20Interface token = ERC20Interface(tokens[tokenIndex].contractAddress);
+
+		tokenBalanceForAddress[msg.sender][tokenIndex] -= amount;
+
+		emit LogWithdrawToken(symbolName, msg.sender, amount, block.timestamp);
+
+		emit consoleLog("hello");
+		return 100;
+  }
+	
 
   function getBalanceForToken(string memory symbolName) public view returns (uint) {
-		uint balanceForToken;
-		return balanceForToken;
+		return tokenBalanceForAddress[msg.sender][getTokenIndex(symbolName)];
   }
 
-  function addToken(string memory symbolName, address EC20TokenAddress) public onlyowner {
 
+	function hasToken(string memory symbolName) public view returns (bool) {
+		return getTokenIndex(symbolName) > 0;
   }
 
-  function hasToken(string memory symbolName) public view returns (bool) {
-		bool isTokenFound;
-		return isTokenFound;
-  }
+
+	function getTokenIndex(string memory symbolName) public view returns (uint8) {
+		for (uint8 i = 1; i <= tokenIndex; i++) {
+			if (keccak256(bytes(symbolName)) == keccak256(bytes(tokens[i].symbolName))) {
+				return i;
+			}
+		}
+		return 0;
+	}
 
   function getOrderBook(bool isBuy, string memory symbolName) public view returns (uint[] memory, uint[] memory) {
 		uint[] memory prices;
