@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
+pragma experimental ABIEncoderV2;
 
 import "./owned.sol";
 import "./Token.sol";
@@ -14,21 +15,15 @@ contract Exchange is owned {
 
 		address contractAddress;
 		string symbolName;
-		
-		mapping (uint => OrderBook) buyOrderBook;
-		uint currentBuyPrice;
-		uint lowestBuyPrice;
-		uint volumnAtCurrentBuyPrice;
 
-		mapping (uint => OrderBook) sellOrderBook;
-		uint currentSellPrice;
-		uint highestSellPrice;
-		uint volumnAtCurrentSellPrice;
+		OrderBook buyOrderBook;
+		OrderBook sellOrderBook;
 
   }
 
-	struct Offer {
+	struct Order {
 		
+		uint price;
 		uint amount;
 		address who;
 
@@ -36,10 +31,11 @@ contract Exchange is owned {
 
 	struct OrderBook {
 
-		mapping (uint => Offer) offers;
-		uint lowerPrice;
-		uint higherPrice;
-		uint offersCount;
+		uint orderIndex;
+		mapping (uint => Order) orders;		
+
+		uint ordersCount;
+		uint[] ordersQueue;
 
   }
 
@@ -65,6 +61,10 @@ contract Exchange is owned {
 	event LogDepositToken(string symbolName, address accountAddress, uint amount, uint timestamp);
 	event LogWithdrawToken(string symbolName, address accountAddress, uint amount, uint timestamp);
 	event LogAddToken(uint tokenIndex, string symbolName, address EC20TokenAddress, uint timestamp);
+
+	event LogBuyToken(string symbolName, uint priceInWei, uint amount, address buyer, uint timestamp);
+
+	event LogCreateBuyOrder(string symbolName, uint priceInWei, uint amount, address buyer, uint timestamp);
 
 	/////////////////////
 	/* FUNCTIONALITIES */
@@ -144,7 +144,6 @@ contract Exchange is owned {
 
 		emit LogWithdrawToken(symbolName, msg.sender, amount, block.timestamp);
 
-		emit consoleLog("hello");
 		return 100;
   }
 	
@@ -168,15 +167,110 @@ contract Exchange is owned {
 		return 0;
 	}
 
-  function getOrderBook(bool isBuy, string memory symbolName) public view returns (uint[] memory, uint[] memory) {
-		uint[] memory prices;
-		uint[] memory volumn;
-		return (prices, volumn);
+
+	// Get order books
+
+	event consoleLog(uint[] a, uint[] b, uint[] c);
+
+	function getBuyOrderBook(string memory symbolName) public returns (uint[] memory, uint[] memory, uint[] memory) {
+		require(hasToken(symbolName));
+
+		uint8 _tokenIndex = getTokenIndex(symbolName);
+		
+		uint[] memory indexes = new uint[](tokens[_tokenIndex].buyOrderBook.ordersCount);
+		uint[] memory prices = new uint[](tokens[_tokenIndex].buyOrderBook.ordersCount);
+		uint[] memory amounts = new uint[](tokens[_tokenIndex].buyOrderBook.ordersCount);
+
+		for (uint i = 1; i <= tokens[_tokenIndex].buyOrderBook.ordersCount; i++) {				
+			Order memory _order = tokens[_tokenIndex].buyOrderBook.orders[tokens[_tokenIndex].buyOrderBook.ordersQueue[i-1]];
+			indexes[i-1] = tokens[_tokenIndex].buyOrderBook.ordersQueue[i-1];
+			prices[i-1] = _order.price;
+			amounts[i-1] = _order.amount;
+		}
+
+		return (indexes, prices, amounts);
+	}
+
+
+	function getSellOrderBook(string memory symbolName) public view returns (uint[] memory prices, uint[] memory amounts) {
+		return (prices, amounts);
   }
 
-  function createOrder(bool isBuy, string memory symbolName, uint priceInWei, uint amount) public {
 
-  }
+	// Create orders (buy / sell)
+
+	function createBuyOrder(string memory symbolName, uint priceInWei, uint amount, address buyer) internal {
+		require(hasToken(symbolName));
+
+		uint8 _tokenIndex = getTokenIndex(symbolName);
+	
+		// Update ordersQueue of OrderBook
+		(uint[] memory indexes, uint[] memory prices, uint[] memory amounts) = getBuyOrderBook(symbolName);
+		uint _newOrderIndex = ++tokens[_tokenIndex].buyOrderBook.orderIndex;
+		uint[] memory _newOrdersQueue = new uint[](_newOrderIndex);
+		
+		bool _isOrderAdded = false;
+		if (tokens[_tokenIndex].buyOrderBook.ordersCount == 0) {
+			_newOrdersQueue[0] = _newOrderIndex;
+			_isOrderAdded = true;
+		}
+		else {
+			uint _newOrdersQueueIndex = 0;
+			for (uint _counter = 0; _counter < tokens[_tokenIndex].buyOrderBook.ordersCount; _counter++) {
+				if (!_isOrderAdded && priceInWei > prices[_counter]) {
+					_newOrdersQueue[_newOrdersQueueIndex++] = _newOrderIndex;
+					_isOrderAdded = true;
+				}
+				_newOrdersQueue[_newOrdersQueueIndex++] = tokens[_tokenIndex].buyOrderBook.ordersQueue[_counter];
+			}
+			// for the case of the price being lower than the lowest price of the orderbook
+			if (!_isOrderAdded) {
+			    _newOrdersQueue[_newOrdersQueueIndex] = _newOrderIndex;
+			}
+		}
+
+		// replace existing orders queue is it's not empty
+		tokens[_tokenIndex].buyOrderBook.ordersQueue = _newOrdersQueue;
+		
+		// Add new order to OrderBook
+		tokens[_tokenIndex].buyOrderBook.ordersCount++;
+		tokens[_tokenIndex].buyOrderBook.orders[_newOrderIndex] = 
+			Order({ price: priceInWei, amount: amount, who: msg.sender });
+		
+		// fire event
+		emit LogCreateBuyOrder(symbolName, priceInWei, amount, buyer, block.timestamp);
+	}
+
+
+	function createSellOrder(string memory symbolName, uint priceInWei, uint amount, address buyer) internal 
+		returns (uint amount_sold) {
+			return 0;
+		}
+
+
+	// Buy / Sell token
+	
+	function buyToken(string memory symbolName, uint priceInWei, uint amount) public {
+		require(hasToken(symbolName));
+
+		uint8 _tokenIndex = getTokenIndex(symbolName);
+		
+		uint total_ether_needed = priceInWei * amount;
+		require(total_ether_needed <= getEtherBalanceInWei());
+		etherBalanceForAddress[msg.sender] -= total_ether_needed;
+
+		createBuyOrder(symbolName, priceInWei, amount, msg.sender);
+
+		/*
+		TODO: Process the buyOrder (to be done after sellToken is implemented)
+		*/
+	}
+
+
+	function sellToken(string memory symbolName, uint priceInWei, uint amount) public {
+		
+	}
+
 
   function cancelOrder(bool isBuy, string memory symbolName, uint offerId) public {
     
