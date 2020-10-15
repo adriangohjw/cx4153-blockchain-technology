@@ -63,8 +63,10 @@ contract Exchange is owned {
 	event LogAddToken(uint tokenIndex, string symbolName, address EC20TokenAddress, uint timestamp);
 
 	event LogBuyToken(string symbolName, uint priceInWei, uint amount, address buyer, uint timestamp);
+	event LogSellToken(string symbolName, uint priceInWei, uint amount, address buyer, uint timestamp);
 
 	event LogCreateBuyOrder(string symbolName, uint priceInWei, uint amount, address buyer, uint timestamp);
+	event LogCreateSellOrder(string symbolName, uint priceInWei, uint amount, address buyer, uint timestamp);
 
 	/////////////////////
 	/* FUNCTIONALITIES */
@@ -192,8 +194,25 @@ contract Exchange is owned {
 	}
 
 
-	function getSellOrderBook(string memory symbolName) public view returns (uint[] memory prices, uint[] memory amounts) {
-		return (prices, amounts);
+	function getSellOrderBook(string memory symbolName) public returns (uint[] memory, uint[] memory, uint[] memory) {
+		require(hasToken(symbolName));
+
+		uint8 _tokenIndex = getTokenIndex(symbolName);
+		
+		uint[] memory indexes = new uint[](tokens[_tokenIndex].sellOrderBook.ordersCount);
+		uint[] memory prices = new uint[](tokens[_tokenIndex].sellOrderBook.ordersCount);
+		uint[] memory amounts = new uint[](tokens[_tokenIndex].sellOrderBook.ordersCount);
+
+		for (uint i = 1; i <= tokens[_tokenIndex].sellOrderBook.ordersCount; i++) {				
+			Order memory _order = tokens[_tokenIndex].sellOrderBook.orders[tokens[_tokenIndex].sellOrderBook.ordersQueue[i-1]];
+			indexes[i-1] = tokens[_tokenIndex].sellOrderBook.ordersQueue[i-1];
+			prices[i-1] = _order.price;
+			amounts[i-1] = _order.amount;
+		}
+
+		emit consoleLog(indexes, prices, amounts);
+		
+		return (indexes, prices, amounts);
   }
 
 
@@ -242,9 +261,48 @@ contract Exchange is owned {
 	}
 
 
-	function createSellOrder(string memory symbolName, uint priceInWei, uint amount, address buyer) internal 
-		returns (uint amount_sold) {
-			return 0;
+	function createSellOrder(string memory symbolName, uint priceInWei, uint amount, address seller) internal {
+			require(hasToken(symbolName));
+			require(priceInWei > 0);
+			require(amount > 0);
+
+			uint8 _tokenIndex = getTokenIndex(symbolName);
+		
+			// Update ordersQueue of OrderBook
+			(uint[] memory indexes, uint[] memory prices, uint[] memory amounts) = getSellOrderBook(symbolName);
+			uint _newOrderIndex = ++tokens[_tokenIndex].sellOrderBook.orderIndex;
+			uint[] memory _newOrdersQueue = new uint[](_newOrderIndex);
+			
+			bool _isOrderAdded = false;
+			if (tokens[_tokenIndex].sellOrderBook.ordersCount == 0) {
+				_newOrdersQueue[0] = _newOrderIndex;
+				_isOrderAdded = true;
+			}
+			else {
+				uint _newOrdersQueueIndex = 0;
+				for (uint _counter = 0; _counter < tokens[_tokenIndex].sellOrderBook.ordersCount; _counter++) {
+					if (!_isOrderAdded && priceInWei < prices[_counter]) {
+						_newOrdersQueue[_newOrdersQueueIndex++] = _newOrderIndex;
+						_isOrderAdded = true;
+					}
+					_newOrdersQueue[_newOrdersQueueIndex++] = tokens[_tokenIndex].sellOrderBook.ordersQueue[_counter];
+				}
+				// for the case of the price being lower than the lowest price of the orderbook
+				if (!_isOrderAdded) {
+						_newOrdersQueue[_newOrdersQueueIndex] = _newOrderIndex;
+				} 
+			}
+
+			// replace existing orders queue is it's not empty
+			tokens[_tokenIndex].sellOrderBook.ordersQueue = _newOrdersQueue;
+			
+			// Add new order to OrderBook
+			tokens[_tokenIndex].sellOrderBook.ordersCount++;
+			tokens[_tokenIndex].sellOrderBook.orders[_newOrderIndex] = 
+				Order({ price: priceInWei, amount: amount, who: msg.sender });
+			
+			// fire event
+			emit LogCreateSellOrder(symbolName, priceInWei, amount, seller, block.timestamp);
 		}
 
 
@@ -268,7 +326,19 @@ contract Exchange is owned {
 
 
 	function sellToken(string memory symbolName, uint priceInWei, uint amount) public {
+		require(hasToken(symbolName));
+
+		uint8 _tokenIndex = getTokenIndex(symbolName);
 		
+		uint total_token_available = tokenBalanceForAddress[msg.sender][_tokenIndex];
+		require(amount <= total_token_available);
+		tokenBalanceForAddress[msg.sender][_tokenIndex] -= amount;
+
+		createSellOrder(symbolName, priceInWei, amount, msg.sender);
+
+		/*
+		TODO: Process the buyOrder
+		*/
 	}
 
 
