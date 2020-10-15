@@ -172,9 +172,7 @@ contract Exchange is owned {
 
 	// Get order books
 
-	event consoleLog(uint[] a, uint[] b, uint[] c);
-
-	function getBuyOrderBook(string memory symbolName) public returns (uint[] memory, uint[] memory, uint[] memory) {
+	function getBuyOrderBook(string memory symbolName) public view returns (uint[] memory, uint[] memory, uint[] memory) {
 		require(hasToken(symbolName));
 
 		uint8 _tokenIndex = getTokenIndex(symbolName);
@@ -194,7 +192,7 @@ contract Exchange is owned {
 	}
 
 
-	function getSellOrderBook(string memory symbolName) public returns (uint[] memory, uint[] memory, uint[] memory) {
+	function getSellOrderBook(string memory symbolName) public view returns (uint[] memory, uint[] memory, uint[] memory) {
 		require(hasToken(symbolName));
 
 		uint8 _tokenIndex = getTokenIndex(symbolName);
@@ -209,8 +207,6 @@ contract Exchange is owned {
 			prices[i-1] = _order.price;
 			amounts[i-1] = _order.amount;
 		}
-
-		emit consoleLog(indexes, prices, amounts);
 		
 		return (indexes, prices, amounts);
   }
@@ -218,7 +214,7 @@ contract Exchange is owned {
 
 	// Create orders (buy / sell)
 
-	function createBuyOrder(string memory symbolName, uint priceInWei, uint amount, address buyer) internal {
+	function createBuyOrder(string memory symbolName, uint priceInWei, uint amount, address buyer) private {
 		require(hasToken(symbolName));
 
 		uint8 _tokenIndex = getTokenIndex(symbolName);
@@ -261,10 +257,8 @@ contract Exchange is owned {
 	}
 
 
-	function createSellOrder(string memory symbolName, uint priceInWei, uint amount, address seller) internal {
+	function createSellOrder(string memory symbolName, uint priceInWei, uint amount, address seller) private {
 			require(hasToken(symbolName));
-			require(priceInWei > 0);
-			require(amount > 0);
 
 			uint8 _tokenIndex = getTokenIndex(symbolName);
 		
@@ -310,6 +304,8 @@ contract Exchange is owned {
 	
 	function buyToken(string memory symbolName, uint priceInWei, uint amount) public {
 		require(hasToken(symbolName));
+		require(priceInWei > 0);
+		require(amount > 0);
 
 		uint8 _tokenIndex = getTokenIndex(symbolName);
 		
@@ -327,6 +323,8 @@ contract Exchange is owned {
 
 	function sellToken(string memory symbolName, uint priceInWei, uint amount) public {
 		require(hasToken(symbolName));
+		require(priceInWei > 0);
+		require(amount > 0);
 
 		uint8 _tokenIndex = getTokenIndex(symbolName);
 		
