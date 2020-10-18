@@ -68,6 +68,8 @@ contract Exchange is owned {
 	event LogCreateBuyOrder(string symbolName, uint priceInWei, uint amount, address buyer, uint timestamp);
 	event LogCreateSellOrder(string symbolName, uint priceInWei, uint amount, address seller, uint timestamp);
 
+	event LogFulfilSellOrder(string symbolName, uint orderIndex, uint priceInWei, uint amount, uint timestamp);
+
 	event LogCancelBuyOrder(string symbolName, uint orderIndex, address buyer, uint timestamp);
 	event LogCancelSellOrder(string symbolName, uint orderIndex, address seller, uint timestamp);
 
@@ -221,42 +223,88 @@ contract Exchange is owned {
 		require(hasToken(symbolName));
 
 		uint8 _tokenIndex = getTokenIndex(symbolName);
-	
-		// Update ordersQueue of OrderBook
-		(uint[] memory indexes, uint[] memory prices, uint[] memory amounts) = getBuyOrderBook(symbolName);
-		uint _newOrderIndex = ++tokens[_tokenIndex].buyOrderBook.orderIndex;
-		uint[] memory _newOrdersQueue = new uint[](_newOrderIndex);
-		
-		bool _isOrderAdded = false;
-		if (tokens[_tokenIndex].buyOrderBook.ordersCount == 0) {
-			_newOrdersQueue[0] = _newOrderIndex;
-			_isOrderAdded = true;
-		}
-		else {
-			uint _newOrdersQueueIndex = 0;
-			for (uint _counter = 0; _counter < tokens[_tokenIndex].buyOrderBook.ordersCount; _counter++) {
-				if (!_isOrderAdded && priceInWei > prices[_counter]) {
-					_newOrdersQueue[_newOrdersQueueIndex++] = _newOrderIndex;
-					_isOrderAdded = true;
-				}
-				_newOrdersQueue[_newOrdersQueueIndex++] = tokens[_tokenIndex].buyOrderBook.ordersQueue[_counter];
-			}
-			// for the case of the price being lower than the lowest price of the orderbook
-			if (!_isOrderAdded) {
-			    _newOrdersQueue[_newOrdersQueueIndex] = _newOrderIndex;
-			}
-		}
 
-		// replace existing orders queue is it's not empty
-		tokens[_tokenIndex].buyOrderBook.ordersQueue = _newOrdersQueue;
-		
-		// Add new order to OrderBook
-		tokens[_tokenIndex].buyOrderBook.ordersCount++;
-		tokens[_tokenIndex].buyOrderBook.orders[_newOrderIndex] = 
-			Order({ price: priceInWei, amount: amount, who: msg.sender });
-		
-		// fire event
-		emit LogCreateBuyOrder(symbolName, priceInWei, amount, buyer, block.timestamp);
+		uint _buy_amount_balance = amount;
+		uint _currSellOrdersCount = tokens[_tokenIndex].sellOrderBook.ordersCount;
+
+		// fulfil buyOrder by checking against which sell orders can be fulfil
+		if (_currSellOrdersCount > 0) {
+			uint _countSellOrderFulfiled = 0;
+
+			// update sellOrderBook - orders
+			for (uint i = 0; i < _currSellOrdersCount; i++) {
+				if (_buy_amount_balance == 0) break;
+
+				uint _orderIndex = tokens[_tokenIndex].sellOrderBook.ordersQueue[i];
+				uint _orderPrice = tokens[_tokenIndex].sellOrderBook.orders[_orderIndex].price;
+				uint _orderAmount = tokens[_tokenIndex].sellOrderBook.orders[_orderIndex].amount;
+				if (priceInWei < _orderPrice) break;
+
+				if (_buy_amount_balance >= _orderAmount) {
+					_buy_amount_balance -= _orderAmount;
+					
+					tokens[_tokenIndex].sellOrderBook.orders[_orderIndex].amount = 0;
+					_countSellOrderFulfiled++;
+					emit LogFulfilSellOrder(symbolName, _orderIndex, priceInWei, _orderAmount, block.timestamp);
+				}
+				else {
+					tokens[_tokenIndex].sellOrderBook.orders[_orderIndex].amount -= _buy_amount_balance;
+					emit LogFulfilSellOrder(symbolName, _orderIndex, priceInWei, _buy_amount_balance, block.timestamp);
+
+					_buy_amount_balance = 0;
+				}
+			}
+
+			// update sellOrderBook - ordersBook and ordersCount
+			uint _newSellOrdersCount = _currSellOrdersCount - _countSellOrderFulfiled;
+
+			uint[] memory _newSellOrdersQueue = new uint[](_newSellOrdersCount);
+			for (uint i = 0; i < _newSellOrdersCount; i++) {
+				_newSellOrdersQueue[i] = tokens[_tokenIndex].sellOrderBook.ordersQueue[i + _countSellOrderFulfiled];
+			}
+
+			tokens[_tokenIndex].sellOrderBook.ordersCount = _newSellOrdersCount;
+			tokens[_tokenIndex].sellOrderBook.ordersQueue = _newSellOrdersQueue;
+		} 
+	
+		// check if buyOrder is fully fulfiled
+		if (_buy_amount_balance > 0) {
+			// update buyOrderBook - ordersQueue
+			(uint[] memory indexes, uint[] memory prices, uint[] memory amounts) = getBuyOrderBook(symbolName);
+			uint _newOrderIndex = ++tokens[_tokenIndex].buyOrderBook.orderIndex;
+			uint[] memory _newOrdersQueue = new uint[](_newOrderIndex);
+			
+			bool _isOrderAdded = false;
+			if (tokens[_tokenIndex].buyOrderBook.ordersCount == 0) {
+				_newOrdersQueue[0] = _newOrderIndex;
+				_isOrderAdded = true;
+			}
+			else {
+				uint _newOrdersQueueIndex = 0;
+				for (uint _counter = 0; _counter < tokens[_tokenIndex].buyOrderBook.ordersCount; _counter++) {
+					if (!_isOrderAdded && priceInWei > prices[_counter]) {
+						_newOrdersQueue[_newOrdersQueueIndex++] = _newOrderIndex;
+						_isOrderAdded = true;
+					}
+					_newOrdersQueue[_newOrdersQueueIndex++] = tokens[_tokenIndex].buyOrderBook.ordersQueue[_counter];
+				}
+				// for the case of the price being lower than the lowest price of the orderbook
+				if (!_isOrderAdded) {
+						_newOrdersQueue[_newOrdersQueueIndex] = _newOrderIndex;
+				}
+			}
+
+			// replace existing orders queue is it's not empty
+			tokens[_tokenIndex].buyOrderBook.ordersQueue = _newOrdersQueue;
+			
+			// Add new order to OrderBook
+			tokens[_tokenIndex].buyOrderBook.ordersCount++;
+			tokens[_tokenIndex].buyOrderBook.orders[_newOrderIndex] = 
+				Order({ price: priceInWei, amount: _buy_amount_balance, who: msg.sender });
+			
+			// fire event
+			emit LogCreateBuyOrder(symbolName, priceInWei, _buy_amount_balance, buyer, block.timestamp);
+		}
 	}
 
 
@@ -317,10 +365,6 @@ contract Exchange is owned {
 		etherBalanceForAddress[msg.sender] -= total_ether_needed;
 
 		createBuyOrder(symbolName, priceInWei, amount, msg.sender);
-
-		/*
-		TODO: Process the buyOrder (to be done after sellToken is implemented)
-		*/
 	}
 
 
@@ -336,10 +380,6 @@ contract Exchange is owned {
 		tokenBalanceForAddress[msg.sender][_tokenIndex] -= amount;
 
 		createSellOrder(symbolName, priceInWei, amount, msg.sender);
-
-		/*
-		TODO: Process the buyOrder
-		*/
 	}
 
 
