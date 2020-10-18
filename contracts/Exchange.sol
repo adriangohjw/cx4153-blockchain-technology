@@ -66,7 +66,10 @@ contract Exchange is owned {
 	event LogSellToken(string symbolName, uint priceInWei, uint amount, address buyer, uint timestamp);
 
 	event LogCreateBuyOrder(string symbolName, uint priceInWei, uint amount, address buyer, uint timestamp);
-	event LogCreateSellOrder(string symbolName, uint priceInWei, uint amount, address buyer, uint timestamp);
+	event LogCreateSellOrder(string symbolName, uint priceInWei, uint amount, address seller, uint timestamp);
+
+	event LogCancelBuyOrder(string symbolName, uint orderIndex, address buyer, uint timestamp);
+	event LogCancelSellOrder(string symbolName, uint orderIndex, address seller, uint timestamp);
 
 	/////////////////////
 	/* FUNCTIONALITIES */
@@ -340,8 +343,76 @@ contract Exchange is owned {
 	}
 
 
-  function cancelOrder(bool isBuy, string memory symbolName, uint offerId) public {
-    
+  function cancelBuyOrder(string memory symbolName, uint orderIndex) public {
+		require(hasToken(symbolName));
+
+		uint8 _tokenIndex = getTokenIndex(symbolName);
+
+		require(tokens[_tokenIndex].buyOrderBook.ordersCount > 0);
+
+		// Check order is in OrderBook
+		// Create new orderQueue
+		bool _isOrderInBook = false;
+		uint _newOrderQueueIndex = 0;
+		uint[] memory _newOrdersQueue = new uint[](tokens[_tokenIndex].buyOrderBook.ordersCount - 1);
+		uint _priceInWei;
+		uint _amount;
+		
+		for (uint _orderQueueIndex = 0; _orderQueueIndex < tokens[_tokenIndex].buyOrderBook.ordersCount; _orderQueueIndex++) {
+			if (orderIndex == tokens[_tokenIndex].buyOrderBook.ordersQueue[_orderQueueIndex]) {
+				_isOrderInBook = true;
+				_priceInWei = tokens[_tokenIndex].buyOrderBook.orders[orderIndex].price;
+				_amount = tokens[_tokenIndex].buyOrderBook.orders[orderIndex].amount;
+			} else {
+				_newOrdersQueue[_newOrderQueueIndex] = tokens[_tokenIndex].buyOrderBook.ordersQueue[_orderQueueIndex];
+				_newOrderQueueIndex++;
+			}
+		}
+		require(_isOrderInBook);		
+
+		// Update OrderBook and OrderQueue
+		tokens[_tokenIndex].buyOrderBook.ordersCount--;
+		tokens[_tokenIndex].buyOrderBook.ordersQueue = _newOrdersQueue;
+
+		// refund ether balance back to user's account
+		etherBalanceForAddress[msg.sender] += _priceInWei * _amount;
+
+		emit LogCancelBuyOrder(symbolName, orderIndex, msg.sender, block.timestamp);
+  }
+
+	function cancelSellOrder(string memory symbolName, uint orderIndex) public {
+		require(hasToken(symbolName));
+
+		uint8 _tokenIndex = getTokenIndex(symbolName);
+
+		require(tokens[_tokenIndex].sellOrderBook.ordersCount > 0);
+
+		// Check order is in OrderBook
+		// Create new orderQueue
+		bool _isOrderInBook = false;
+		uint _newOrderQueueIndex = 0;
+		uint[] memory _newOrdersQueue = new uint[](tokens[_tokenIndex].sellOrderBook.ordersCount - 1);
+		uint _amount;
+		
+		for (uint _orderQueueIndex = 0; _orderQueueIndex < tokens[_tokenIndex].sellOrderBook.ordersCount; _orderQueueIndex++) {
+			if (orderIndex == tokens[_tokenIndex].sellOrderBook.ordersQueue[_orderQueueIndex]) {
+				_isOrderInBook = true;
+				_amount = tokens[_tokenIndex].sellOrderBook.orders[orderIndex].amount;
+			} else {
+				_newOrdersQueue[_newOrderQueueIndex] = tokens[_tokenIndex].sellOrderBook.ordersQueue[_orderQueueIndex];
+				_newOrderQueueIndex++;
+			}
+		}
+		require(_isOrderInBook);		
+
+		// Update OrderBook and OrderQueue
+		tokens[_tokenIndex].sellOrderBook.ordersCount--;
+		tokens[_tokenIndex].sellOrderBook.ordersQueue = _newOrdersQueue;
+
+		// refund token balance back to user's account
+		tokenBalanceForAddress[msg.sender][_tokenIndex] += _amount;
+
+		emit LogCancelSellOrder(symbolName, orderIndex, msg.sender, block.timestamp);
   }
 
 } 
