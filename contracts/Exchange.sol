@@ -285,6 +285,8 @@ contract Exchange is owned {
 			uint _orderIndex = tokens[_tokenIndex].sellOrderBook.ordersQueue[i];
 			uint _orderPrice = tokens[_tokenIndex].sellOrderBook.orders[_orderIndex].price;
 			uint _orderAmount = tokens[_tokenIndex].sellOrderBook.orders[_orderIndex].amount;
+			address _orderOwner = tokens[_tokenIndex].sellOrderBook.orders[_orderIndex].who;
+
 			if (priceInWei < _orderPrice) break;
 
 			if (_buy_amount_balance >= _orderAmount) {
@@ -293,10 +295,14 @@ contract Exchange is owned {
 				tokens[_tokenIndex].sellOrderBook.orders[_orderIndex].amount = 0;
 				_countSellOrderFulfiled++;
 				emit LogFulfilSellOrder(symbolName, _orderIndex, priceInWei, _orderAmount, block.timestamp);
+
+				etherBalanceForAddress[_orderOwner] += priceInWei * _orderAmount;
 			}
 			else {
 				tokens[_tokenIndex].sellOrderBook.orders[_orderIndex].amount -= _buy_amount_balance;
 				emit LogFulfilSellOrder(symbolName, _orderIndex, priceInWei, _buy_amount_balance, block.timestamp);
+
+				etherBalanceForAddress[_orderOwner] += priceInWei * _buy_amount_balance;
 
 				_buy_amount_balance = 0;
 			}
