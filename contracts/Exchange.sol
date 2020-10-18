@@ -298,12 +298,14 @@ contract Exchange is owned {
 				emit LogFulfilSellOrder(symbolName, _orderIndex, priceInWei, _orderAmount, block.timestamp);
 
 				etherBalanceForAddress[_orderOwner] += priceInWei * _orderAmount;
+				tokenBalanceForAddress[msg.sender][_tokenIndex] += _orderAmount;
 			}
 			else {
 				tokens[_tokenIndex].sellOrderBook.orders[_orderIndex].amount -= _buy_amount_balance;
 				emit LogFulfilSellOrder(symbolName, _orderIndex, priceInWei, _buy_amount_balance, block.timestamp);
 
 				etherBalanceForAddress[_orderOwner] += priceInWei * _buy_amount_balance;
+				tokenBalanceForAddress[msg.sender][_tokenIndex] += _buy_amount_balance;
 
 				_buy_amount_balance = 0;
 			}
