@@ -131,7 +131,6 @@ contract Exchange is owned {
 		require(getBalanceForToken(symbolName) + amount >= getBalanceForToken(symbolName));
 
 		tokenIndex = getTokenIndex(symbolName);	
-		ERC20Interface token = ERC20Interface(tokens[tokenIndex].contractAddress);
 
 		tokenBalanceForAddress[msg.sender][tokenIndex] += amount;
 
@@ -146,13 +145,12 @@ contract Exchange is owned {
 		require(amount <= getBalanceForToken(symbolName));
 
 		tokenIndex = getTokenIndex(symbolName);	
-		ERC20Interface token = ERC20Interface(tokens[tokenIndex].contractAddress);
 
 		tokenBalanceForAddress[msg.sender][tokenIndex] -= amount;
 
 		emit LogWithdrawToken(symbolName, msg.sender, amount, block.timestamp);
 
-		return 100;
+		return getBalanceForToken(symbolName);
   }
 	
 
@@ -438,8 +436,6 @@ contract Exchange is owned {
 		require(hasToken(symbolName));
 		require(priceInWei > 0);
 		require(amount > 0);
-
-		uint8 _tokenIndex = getTokenIndex(symbolName);
 		
 		uint total_ether_needed = priceInWei * amount;
 		require(total_ether_needed <= getEtherBalanceInWei());
