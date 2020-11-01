@@ -26,8 +26,6 @@ const infuraKey = secrets.infuraKey;
 const fs = require('fs');
 const mnemonic = fs.readFileSync(".secret").toString().trim();
 
-ropsten_endpoints = 
-
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
