@@ -1,0 +1,91 @@
+:root {
+  --primary: #1fc76a;
+  --primary-hover: #1AA658;
+}
+
+@media screen {
+
+  .container-max-width {
+    max-width: 1140px;
+    margin: auto;
+    padding: 15px;
+  }
+
+  .main-dashboard {
+    color: white;
+    background-color: var(--primary);
+    border-radius: 8px;
+  }
+
+  .enableEthereumButton {
+    color: white;
+    background-color: var(--primary);
+    border-color: var(--primary);
+  }
+  .enableEthereumButton:hover {
+    color: white;
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+  }
+
+}
+
+/* lg (laptop) */
+@media screen and (max-width: 1140px) {
+  .show-only-on-small {
+    display: none;
+  }
+  .show-only-on-large {
+    display: inline-block;
+  }
+
+  .job-listing-card-company-avatar {
+    width: 70%;
+  }
+
+  .right-when-large-left-when-small {
+    text-align: right;
+  }
+}
+
+/* md (small laptop) */
+@media screen and (max-width: 960px) {
+  .show-only-on-small {
+    display: none;
+  }
+  .show-only-on-large {
+    display: inline-block;
+  }
+
+  .right-when-large-left-when-small {
+    text-align: right;
+  }
+}
+
+/* sm (tablets) */
+@media screen and (max-width: 768px) {
+  .show-only-on-small {
+    display: inline-block;
+  }
+  .show-only-on-large {
+    display: none;
+  }
+
+  .right-when-large-left-when-small {
+    text-align: left;
+  }
+}
+
+/* xs (phone) */
+@media screen and (max-width: 576px) {
+  .show-only-on-small {
+    display: inline-block;
+  }
+  .show-only-on-large {
+    display: none;
+  }
+
+  .right-when-large-left-when-small {
+    text-align: left;
+  }
+}
