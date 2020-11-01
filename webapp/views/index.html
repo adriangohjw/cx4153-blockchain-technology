@@ -45,8 +45,6 @@
 </html>
 
 <script>
-  var account;
-
   const ethereumButton = document.querySelector('.enableEthereumButton');
   const showAccount = document.querySelector('.showAccount');
 
@@ -55,11 +53,8 @@
   });
 
   async function getAccount() {
-    if (account === undefined) {
-      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-      account = accounts[0];
-    }
-    return account;
+    const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+    return accounts[0];
   }
 
   async function getEtherBalanceInWei() {
