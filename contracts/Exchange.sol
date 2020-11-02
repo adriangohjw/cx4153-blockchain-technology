@@ -130,9 +130,12 @@ contract Exchange is owned {
 		require(hasToken(symbolName));
 		require(getBalanceForToken(symbolName) + amount >= getBalanceForToken(symbolName));
 
-		tokenIndex = getTokenIndex(symbolName);	
+		uint8 _tokenIndex = getTokenIndex(symbolName);	
 
-		tokenBalanceForAddress[msg.sender][tokenIndex] += amount;
+		ERC20Interface token = ERC20Interface(tokens[_tokenIndex].contractAddress);
+		require(token.transferFrom(msg.sender, address(this), amount) == true);
+
+		tokenBalanceForAddress[msg.sender][_tokenIndex] += amount;
 
 		emit LogDepositToken(symbolName, msg.sender, amount, block.timestamp);
 
@@ -144,9 +147,13 @@ contract Exchange is owned {
 		require(hasToken(symbolName));
 		require(amount <= getBalanceForToken(symbolName));
 
-		tokenIndex = getTokenIndex(symbolName);	
+		uint8 _tokenIndex = getTokenIndex(symbolName);
+		
+		ERC20Interface token = ERC20Interface(tokens[_tokenIndex].contractAddress);
 
-		tokenBalanceForAddress[msg.sender][tokenIndex] -= amount;
+		tokenBalanceForAddress[msg.sender][_tokenIndex] -= amount;
+
+		require(token.transfer(msg.sender, amount) == true);
 
 		emit LogWithdrawToken(symbolName, msg.sender, amount, block.timestamp);
 
