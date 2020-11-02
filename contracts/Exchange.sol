@@ -179,6 +179,19 @@ contract Exchange is owned {
 		return getTokenIndex(symbolName) > 0;
   }
 
+	
+	function getAllTokens() public view returns (string[] memory, address[] memory) {
+		string[] memory symbolNames = new string[](tokenIndex-1);
+		address[] memory addresses = new address[](tokenIndex-1);
+
+		for (uint8 i = 2; i <= tokenIndex; i++) {
+			symbolNames[i-2] = tokens[i].symbolName;
+			addresses[i-2] = tokens[i].contractAddress;
+		}
+
+		return (symbolNames, addresses);
+	}
+
 
 	function getTokenIndex(string memory symbolName) public view returns (uint8) {
 		for (uint8 i = 1; i <= tokenIndex; i++) {
