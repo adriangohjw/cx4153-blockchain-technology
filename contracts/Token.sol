@@ -47,6 +47,8 @@ contract Token is ERC20Interface, owned {
 		owner = msg.sender;
 		balances[owner] = totalSupply;
 	}
+	
+	event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
 	function getName() public view returns (string memory) {
 		return name;
@@ -69,11 +71,31 @@ contract Token is ERC20Interface, owned {
 	}
 
 	function transfer(address _to, uint256 _value) public returns (bool success) {
-		return success;
+		if (balances[msg.sender] >= _value
+			&& _value > 0
+			&& balances[_to] + _value > balances[_to]) {
+					balances[msg.sender] -= _value;
+					balances[_to] += _value;
+					emit Transfer(msg.sender, _to, _value);
+					return true;
+			}
+			else {
+					return false;
+			}
 	}
 
 	function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
-		return success;
+		if (balances[_from] >= _value
+        && _value > 0
+        && balances[_to] + _value > balances[_to]) {
+            balances[_from] -= _value;
+            balances[_to] += _value;
+            emit Transfer(_from, _to, _value);
+            return true;
+        }
+        else {
+            return false;
+        }
 	}
 
 	function approve(address _spender, uint256 _value) public returns (bool success) {
