@@ -36,63 +36,128 @@
         </div>
       </div>
 
-      <div class="container mb-4">
-        <button class="enableEthereumButton btn btn-sm btn-primary">Enable Ethereum</button>
-        <p style="font-weight: bold;">Account: <span class="showAccount"></span></p>
-        <hr>
-        
-        <div class="form-group mt-4">
-          <label for="etherAmountToDeposit">Ether amount to deposit</label>
-          <input type="number" class="form-control" id="etherAmountToDeposit" placeholder="Enter ether amount to deposit (min. 0.0001 eth)" min="0.0001" step="0.0001">
+      <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+          <a class="nav-item nav-link active" id="exchange-tab" data-toggle="tab" href="#exchange" role="tab" aria-controls="exchange" aria-selected="true">Exchange</a>
+          <a class="nav-item nav-link" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false">Settings</a>
         </div>
-        <button class="depositEtherButton btn btn-sm btn-primary">Deposit Ether</button>
-        <br>
+      </nav>
 
-        <div class="form-group mt-4">
-          <label for="etherAmountToWithdraw">Ether amount to withdraw</label>
-          <input type="number" class="form-control" id="etherAmountToWithdraw" placeholder="Enter ether amount to withdraw (min. 0.0001 eth)" min="0.0001" step="0.0001">
+      <div class="tab-content d-flex" id="myTabContent" style="flex: 1 1 0">
+        <div id="exchange" class="tab-pane fade show active pt-3 w-100">
+          <div class="container main-dashboard">
+            hello<br>
+          </div>
         </div>
-        <button class="btn btn-sm btn-primary" id="withdrawEtherButton" onclick="withdrawEther()">Withdraw Ether</button>
-        <br>
-        
-        <div class="mt-4">
-          <button class="btn btn-sm btn-primary" onclick="updateEtherBalance()">Update Ether balance</button>
-          <p style="font-weight: bold;">Ether balance: <span id="etherBalance"></span></p>
+        <div id="settings" class="tab-pane fade show pt-3 w-100">
+          <div class="container mb-4">
+            <div class="header mb-3">
+              <h2>Metamask</h2>
+            </div>
+
+            <div class="mb-4">
+              <h4>Connect to Metamask</h4>
+              <p><span style="font-weight: bold;">Account: </span><span class="showAccount">-</span></p>
+              <button class="enableEthereumButton btn btn-sm btn-primary">Connect</button>
+            </div>
+          </div>
+          <hr>
+
+          <div class="container mb-4">
+            <div class="header mb-3">
+              <h2>Ether Balance</h2>
+            </div>
+
+            <div class="mb-4">
+              <p><span style="font-weight: bold;">Balance: </span> <span id="etherBalance"></span></p>
+            </div>
+
+            <div class="mb-4">
+              <div class="row">
+                <div class="col">
+                  <div class="form-group">
+                    <label for="etherAmountToDeposit">Amount to deposit</label>
+                    <div class="input-group input-group-sm">
+                      <input type="number" class="form-control form-control-sm" id="etherAmountToDeposit" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+                      <div class="input-group-append">
+                        <span class="input-group-text">ETH</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button class="depositEtherButton btn btn-sm btn-primary">Deposit</button>
+                  <br>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                    <label for="etherAmountToWithdraw">Amount to withdraw</label>
+                    <div class="input-group input-group-sm">
+                      <input type="number" class="form-control form-control-sm" id="etherAmountToWithdraw" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+                      <div class="input-group-append">
+                        <span class="input-group-text">ETH</span>
+                      </div>
+                    </div>
+                  </div>        
+                  <button class="btn btn-sm btn-primary" id="withdrawEtherButton" onclick="withdrawEther()">Withdraw</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr>
+
+          <div class="container mb-4">
+            <div class="header mb-3">
+              <h2>Other ERC20 Tokens</h2>
+            </div>
+
+            <div class="mb-2">
+              <label for="tokenSymbol">Token symbol</label>
+              <div class="row">
+                <div class="col-6">
+                  <input type="text" class="form-control form-control-sm" id="tokenSymbol" placeholder="Enter token symbol">
+                  <hr>
+                </div>
+                <div class="col-6">
+                  <button class="btn btn-primary btn-sm" onclick="updateSymbol()">Update</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <p><span style="font-weight: bold;">Balance:</span> <span id="tokenBalance">-</span></p>
+            </div>
+
+            <div class="mb-4">
+              <div class="row">
+                <div class="col">
+                  <div class="form-group">
+                    <label for="tokenAmountToDeposit">Amount to deposit</label>
+                    <div class="input-group input-group-sm">
+                      <input type="number" class="form-control" id="tokenAmountToDeposit" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+                      <div class="input-group-append">
+                        <span class="input-group-text token-input-group-text">&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button class="btn btn-sm btn-primary" onclick="depositToken()">Deposit</button>
+                  <br>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                    <label for="tokenAmountToWithdraw">Amount to withdraw</label>
+                    <div class="input-group input-group-sm">
+                      <input type="number" class="form-control" id="tokenAmountToWithdraw" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+                      <div class="input-group-append">
+                        <span class="input-group-text token-input-group-text">&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>        
+                  <button class="btn btn-sm btn-primary" onclick="withdrawToken()">Withdraw</button>
+                </div>
+              </div>
+            </div>
+          </div>  
         </div>
       </div>
-      <hr>
-
-      <div class="container mb-4"> 
-        <div class="row mt-4">
-          <div class="form-group col">
-            <label for="tokenSymbol">Token symbol</label>
-            <input type="text" class="form-control" id="tokenSymbol" placeholder="Enter token symbol">
-          </div>
-        </div>
-        <div class="row mt-4">
-          <div class="col">
-            <label>Token balance</label>
-            <p style="font-weight: bold;"><span id="tokenBalance">-</span>&nbsp;</p>
-            <button class="btn btn-sm btn-primary" onclick="updateTokenBalance()">Update balance</button>
-          </div>
-          <div class="form-group col">
-            <label for="tokenAmountToDeposit">Amount to deposit</label>
-            <input type="number" class="form-control" id="tokenAmountToDeposit" placeholder="Amount to deposit (min. 0.0001)" min="0.0001" step="0.0001">
-            <button class="btn btn-sm btn-primary" onclick="depositToken()">Deposit Token</button>
-          </div>
-          <div class="form-group col">
-            <label for="tokenAmountToWithdraw">Amount to withdraw</label>
-            <input type="number" class="form-control" id="tokenAmountToWithdraw" placeholder="Amount to withdraw (min. 0.0001)" min="0.0001" step="0.0001">
-            <button class="btn btn-sm btn-primary" onclick="withdrawToken()">Withdraw Token</button>
-          </div>
-        </div>  
-      </div>
-      <br>
-
-      <div class="container main-dashboard">
-        hello<br>
-      </div>
-
     </div>
   </body>
 </html>
@@ -107,6 +172,10 @@
     });
     response = await response.json();
     tokens = response.tokens;
+  });
+
+  $(document).ready(async function() {
+    await updateEtherBalance();
   });
 
   const ethereumButton = document.querySelector('.enableEthereumButton');
@@ -223,6 +292,16 @@
     });
 
     updateTokenBalance();
+  }
+
+  async function updateSymbol() {
+    await updateTokenBalance();
+
+    var symbolName = document.getElementById("tokenSymbol").value;
+    var texts = document.getElementsByClassName("token-input-group-text");
+    for (var i=0; i<texts.length; i++) {
+      texts[i].innerHTML = symbolName;
+    }
   }
 
   async function withdrawToken(){

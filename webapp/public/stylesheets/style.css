@@ -11,6 +11,10 @@
     padding: 15px;
   }
 
+  .header {
+    color: var(--primary);
+  }
+
   .main-dashboard {
     color: white;
     background-color: var(--primary);
