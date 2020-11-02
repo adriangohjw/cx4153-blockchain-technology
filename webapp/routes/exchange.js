@@ -44,6 +44,20 @@ router.post('/addToken', async function(req, res) {
   }
 });
 
+router.get('/getTokenAddress', async function(req, res) {
+  try {
+    var tokenAddress = await contract.methods.getTokenAddress(req.query.symbolName).call();
+    res.json({
+      tokenAddress: tokenAddress
+    })
+  } catch (error) {
+    console.log(error);
+    return { 
+      msg: "Error retrieving token address"
+    };
+  }
+});
+
 router.post('/withdrawEther', async function(req, res) {
   var etherBalanceInWei = await contract.methods.withdrawEther(req.query.amountInWei).send({ from: req.query.addr });
   res.json({
