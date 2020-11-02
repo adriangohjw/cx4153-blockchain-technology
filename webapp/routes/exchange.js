@@ -15,11 +15,11 @@ const local_WSS = `ws://localhost:7545`;
 
 // contract owner's address
 const OwnerAddress = "0xfC4E8AFeF7AD2a37DF8Ad0C3Ce038E4196501Fbe"; // To change to your own testnet wallet address
-const local_OwnerAddress = "0xc97f9e2a6469190894e403e7ea5e3620bfa790fd"; // To change to your own local wallet address
+const local_OwnerAddress = "0xA6891dAC0434Fb05dC91f1EFb43b7B609CE3194e"; // To change to your own local wallet address
 
 // contract address
 const ExchangeContractAddress = "0x1420180D527adfDcb7c17C8eA3a39C6b53b573Ab"; // To change to your own testnet contract address
-const local_ExchangeContractAddress = "0xE39726aD7Ad1079560EAE85085D408ade7407BBd"; // To change to your own local contract address
+const local_ExchangeContractAddress = "0xf4fd9FeBB6E7D2F1852f56aB8869321422274c51"; // To change to your own local contract address
 
 // testnet that contract is deployed on
 const Testnet = "ropsten";
@@ -29,6 +29,20 @@ let web3 = new Web3(
   Web3.currentProvider || new Web3.providers.WebsocketProvider(local_WSS)  // choose infuraWSS (ropsten testnet) / local_WSS (local)
 );
 const contract = new web3.eth.Contract(exchange_artifact.abi, local_ExchangeContractAddress);  // choose ExchangeContractAddress (ropsten testnet) / local_ExchangeContractAddress (local)
+
+router.post('/addToken', async function(req, res) {
+  try {
+    await contract.methods.addToken(req.query.symbolName, req.query.ecr20TokenAddress).send({ from: req.query.addr });
+    res.json({
+      success: true
+    })
+  } catch (error) {
+    console.log(error);
+    return { 
+      msg: "Error adding token"
+    };
+  }
+});
 
 router.post('/withdrawEther', async function(req, res) {
   var etherBalanceInWei = await contract.methods.withdrawEther(req.query.amountInWei).send({ from: req.query.addr });
