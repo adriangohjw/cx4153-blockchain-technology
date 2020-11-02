@@ -98,6 +98,17 @@
 </html>
 
 <script>
+  // Get all tokens before page load
+  var tokens;
+  $(document).ready(async function() {
+    var response = await fetch(`exchange/getAllTokens`, {
+      method: 'GET',
+      credentials: 'same-origin'
+    });
+    response = await response.json();
+    tokens = response.tokens;
+  });
+
   const ethereumButton = document.querySelector('.enableEthereumButton');
   const showAccount = document.querySelector('.showAccount');
 
