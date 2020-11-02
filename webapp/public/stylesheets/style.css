@@ -16,16 +16,21 @@
     background-color: var(--primary);
     border-radius: 8px;
   }
-
-  .enableEthereumButton {
+  
+  .btn-primary {
     color: white;
     background-color: var(--primary);
     border-color: var(--primary);
   }
-  .enableEthereumButton:hover {
+  .btn-primary:hover {
     color: white;
     background-color: var(--primary-hover);
     border-color: var(--primary-hover);
+  }
+  .btn-primary:focus {
+    color: white;
+    background-color: var(--primary);
+    border-color: var(--primary);
   }
 
 }
