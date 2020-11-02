@@ -30,91 +30,6 @@ let web3 = new Web3(
 );
 const contract = new web3.eth.Contract(exchange_artifact.abi, local_ExchangeContractAddress);  // choose ExchangeContractAddress (ropsten testnet) / local_ExchangeContractAddress (local)
 
-// Exchange Contract - getEtherBalanceInWei()
-async function getEtherBalanceInWei(addr) {
-  try {
-    const etherBalanceInWei = await contract.methods.getEtherBalanceInWei().call({ from: addr });
-    return { 
-      address: addr, 
-      balance: etherBalanceInWei
-    };
-  } 
-  catch (error) {
-    console.log(error);
-    return { 
-      msg: "Error retrieving Ether balance"
-    };
-  }
-}
-
-// Exchange Contract - getBalanceForToken
-async function getBalanceForToken(addr, symbolName) {
-  try {
-    const balanceForToken = await contract.methods.getBalanceForToken(symbolName).call({ from: addr });
-    return { 
-      address: addr, 
-      balance: balanceForToken
-    };
-  } catch (error) {
-    console.log(error);
-    return { 
-      msg: "Error retrieving token balance"
-    };
-  }
-}
-
-// Exchange Contract - hasToken
-async function hasToken(symbolName) {
-  try {
-    let isHasToken = await contract.methods.hasToken(symbolName).call();
-    return isHasToken;
-  }
-  catch (error) {
-    console.log(error);
-    return false;
-  }
-}
-
-// Exchange Contract - getBuyOrderBook
-async function getBuyOrderBook(symbolName) {
-  try {
-    const orderBook = await contract.methods.getBuyOrderBook(symbolName).call();
-    return { 
-      is_success: true,
-      indexes: orderBook['0'],
-      prices: orderBook['1'],
-      amounts: orderBook['2']
-    };
-  } 
-  catch (error) {
-    console.log(error);
-    return { 
-      is_success: false,
-      msg: `Error retrieving orderBook for ${symbolName}`
-    };
-  }
-}
-
-// Exchange Contract - getSellOrderBook
-async function getSellOrderBook(symbolName) {
-  try {
-    const orderBook = await contract.methods.getSellOrderBook(symbolName).call();
-    return { 
-      is_success: true,
-      indexes: orderBook['0'],
-      prices: orderBook['1'],
-      amounts: orderBook['2']
-    };
-  } 
-  catch (error) {
-    console.log(error);
-    return { 
-      is_success: false,
-      msg: `Error retrieving orderBook for ${symbolName}`
-    };
-  }
-}
-
 router.post('/withdrawEther', async function(req, res) {
   var etherBalanceInWei = await contract.methods.withdrawEther(req.query.amountInWei).send({ from: req.query.addr });
   res.json({
@@ -123,56 +38,80 @@ router.post('/withdrawEther', async function(req, res) {
 });
 
 router.get('/getEtherBalanceInWei', async function(req, res) {
-  if (req.query.addr) {
-    response = await getEtherBalanceInWei(req.query.addr);
+  try {
+    var etherBalanceInWei = await contract.methods.getEtherBalanceInWei().call({ from: req.query.addr });
     res.json({
-      etherBalanceInWei: response.balance
+      etherBalanceInWei: etherBalanceInWei
     })
+  }
+  catch (error) {
+    console.log(error);
+    return { 
+      msg: "Error retrieving Ether balance"
+    };
   }
 });
 
 router.get('/getBalanceForToken', async function(req, res) {
-  response = await getBalanceForToken(req.query.addr, req.query.symbolName);
-  res.json({
-    balanceForToken: response.balance
-  })
+  try {
+    var balanceForToken = await contract.methods.getBalanceForToken(req.query.symbolName).call({ from: req.query.addr });
+    res.json({
+      balanceForToken: balanceForToken
+    })
+  }
+  catch (error) {
+    console.log(error);
+    return { 
+      msg: "Error retrieving token balance"
+    };
+  }
 });
 
 router.get('/hasToken', async function(req, res) {
-  response = await hasToken(req.query.tokenSymbol);
-  res.json({
-    hasToken: response
-  })
+  try {
+    var response = await contract.methods.hasToken(req.query.tokenSymbol).call();
+    res.json({
+      hasToken: response
+    })
+  }
+  catch (error) {
+    console.log(error);
+    res.json({
+      msg: `Error determining if token exist`
+    })
+  }
 });
 
 router.get('/getBuyOrderBook', async function(req, res) {
-  response = await getBuyOrderBook(req.query.symbolName);
-  if (response.is_success) {
+  try {
+    var buyOrderBook = await contract.methods.getBuyOrderBook(req.query.symbolName).call();
     res.json({
-      indexes: response.indexes,
-      prices: response.prices,
-      amounts: response.amounts
+      indexes: buyOrderBook['0'],
+      prices: buyOrderBook['1'],
+      amounts: buyOrderBook['2']
     })
   }
-  else {
+  catch (error) {
+    console.log(error);
     res.json({
-      msg: response.msg
+      msg: `Error retrieving buyOrderBook`
     })
   }
 });
 
 router.get('/getSellOrderBook', async function(req, res) {
-  response = await getSellOrderBook(req.query.symbolName);
-  if (response.is_success) {
+  try {
+    var sellOrderBook = await contract.methods.getSellOrderBook(req.query.symbolName).call();
     res.json({
-      indexes: response.indexes,
-      prices: response.prices,
-      amounts: response.amounts
+      indexes: sellOrderBook['0'],
+      prices: sellOrderBook['1'],
+      amounts: sellOrderBook['2']
     })
   }
-  else {
-    res.json({
-      msg: response.msg
+  catch (error) {
+    console.log(error);
+    res.json({ 
+      msg: `Error retrieving sellOrderBook`
     })
   }
 });
