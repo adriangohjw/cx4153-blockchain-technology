@@ -39,6 +39,7 @@
       <div class="container mb-4">
         <button class="enableEthereumButton btn btn-sm btn-primary">Enable Ethereum</button>
         <p style="font-weight: bold;">Account: <span class="showAccount"></span></p>
+        <hr>
         
         <div class="form-group mt-4">
           <label for="etherAmountToDeposit">Ether amount to deposit</label>
@@ -54,10 +55,37 @@
         <button class="btn btn-sm btn-primary" id="withdrawEtherButton" onclick="withdrawEther()">Withdraw Ether</button>
         <br>
         
-        <div claa="mt-4">
+        <div class="mt-4">
           <button class="btn btn-sm btn-primary" onclick="updateEtherBalance()">Update Ether balance</button>
           <p style="font-weight: bold;">Ether balance: <span id="etherBalance"></span></p>
         </div>
+      </div>
+      <hr>
+
+      <div class="container mb-4"> 
+        <div class="row mt-4">
+          <div class="form-group col">
+            <label for="tokenSymbol">Token symbol</label>
+            <input type="text" class="form-control" id="tokenSymbol" placeholder="Enter token symbol">
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col">
+            <label>Token balance</label>
+            <p style="font-weight: bold;"><span id="tokenBalance">-</span>&nbsp;</p>
+            <button class="btn btn-sm btn-primary" onclick="updateTokenBalance()">Update balance</button>
+          </div>
+          <div class="form-group col">
+            <label for="tokenAmountToDeposit">Amount to deposit</label>
+            <input type="number" class="form-control" id="tokenAmountToDeposit" placeholder="Amount to deposit (min. 0.0001)" min="0.0001" step="0.0001">
+            <button class="btn btn-sm btn-primary" onclick="depositToken()">Deposit Token</button>
+          </div>
+          <div class="form-group col">
+            <label for="tokenAmountToWithdraw">Amount to withdraw</label>
+            <input type="number" class="form-control" id="tokenAmountToWithdraw" placeholder="Amount to withdraw (min. 0.0001)" min="0.0001" step="0.0001">
+            <button class="btn btn-sm btn-primary" onclick="withdrawToken()">Withdraw Token</button>
+          </div>
+        </div>  
       </div>
       <br>
 
@@ -149,5 +177,56 @@
     });
     
     updateEtherBalance();
+  }
+
+  async function getTokenBalance() {
+    var symbolName = document.getElementById("tokenSymbol").value;
+
+    response = await fetch(`exchange/getBalanceForToken?symbolName=${symbolName}&addr=${await getAccount()}`, {
+      method: 'GET',
+      credentials: 'same-origin'
+    });
+    
+    res = await response.json();
+    var tokenBalance = res.balanceForToken;
+
+    return tokenBalance;
+  }
+
+  async function updateTokenBalance() {
+    var tokenBalance = await getTokenBalance();
+    document.getElementById("tokenBalance").innerHTML = tokenBalance;
+  }
+
+  async function depositToken(){
+    var symbolName = document.getElementById("tokenSymbol").value;
+    var amount = document.getElementById("tokenAmountToDeposit").value;
+    if (amount == "") {
+      console.log("Empty value input for tokenAmountToDeposit");
+      return;
+    }
+
+    await fetch(`exchange/depositToken?addr=${await getAccount()}&symbolName=${symbolName}&amount=${amount}`, {
+      method: 'POST',
+      credentials: 'same-origin'
+    });
+
+    updateTokenBalance();
+  }
+
+  async function withdrawToken(){
+    var symbolName = document.getElementById("tokenSymbol").value;
+    var amount = document.getElementById("tokenAmountToWithdraw").value;
+    if (amount == "") {
+      console.log("Empty value input for tokenAmountToWithdraw");
+      return;
+    }
+
+    await fetch(`exchange/withdrawToken?addr=${await getAccount()}&symbolName=${symbolName}&amount=${amount}`, {
+      method: 'POST',
+      credentials: 'same-origin'
+    });
+
+    updateTokenBalance();
   }
 </script>
