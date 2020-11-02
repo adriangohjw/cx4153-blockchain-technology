@@ -30,6 +30,23 @@ let web3 = new Web3(
 );
 const contract = new web3.eth.Contract(exchange_artifact.abi, local_ExchangeContractAddress);  // choose ExchangeContractAddress (ropsten testnet) / local_ExchangeContractAddress (local)
 
+// Exchange Contract - getEtherBalanceInWei()
+async function getEtherBalanceInWei(addr) {
+  try {
+    const etherBalanceInWei = await contract.methods.getEtherBalanceInWei().call({ from: addr });
+    return { 
+      address: addr, 
+      balance: etherBalanceInWei
+    };
+  } 
+  catch (error) {
+    console.log(error);
+    return { 
+      msg: "Error retrieving Ether balance"
+    };
+  }
+}
+
 // Exchange Contract - getBalanceForToken
 async function getBalanceForToken(addr, symbolName) {
   try {
@@ -55,23 +72,6 @@ async function hasToken(symbolName) {
   catch (error) {
     console.log(error);
     return false;
-  }
-}
-
-// Exchange Contract - getEtherBalanceInWei()
-async function getEtherBalanceInWei(addr) {
-  try {
-    const etherBalanceInWei = await contract.methods.getEtherBalanceInWei().call({ from: addr });
-    return { 
-      address: addr, 
-      balance: etherBalanceInWei
-    };
-  } 
-  catch (error) {
-    console.log(error);
-    return { 
-      msg: "Error retrieving Ether balance"
-    };
   }
 }
 
@@ -115,6 +115,15 @@ async function getSellOrderBook(symbolName) {
   }
 }
 
+router.get('/getEtherBalanceInWei', async function(req, res) {
+  if (req.query.addr) {
+    response = await getEtherBalanceInWei(req.query.addr);
+    res.json({
+      etherBalanceInWei: response.balance
+    })
+  }
+});
+
 router.get('/getBalanceForToken', async function(req, res) {
   response = await getBalanceForToken(req.query.addr, req.query.symbolName);
   res.json({
@@ -127,15 +136,6 @@ router.get('/hasToken', async function(req, res) {
   res.json({
     hasToken: response
   })
-});
-
-router.get('/getEtherBalanceInWei', async function(req, res) {
-  if (req.query.addr) {
-    response = await getEtherBalanceInWei(req.query.addr);
-    res.json({
-      etherBalanceInWei: response.balance
-    })
-  }
 });
 
 router.get('/getBuyOrderBook', async function(req, res) {
