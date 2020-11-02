@@ -60,6 +60,22 @@ router.post('/depositToken', async function(req, res) {
   }
 });
 
+router.post('/withdrawToken', async function(req, res) {
+  try {
+    await contract.methods.withdrawToken(req.query.symbolName, req.query.amount).send({ from: req.query.addr, gas: 1000000 });
+    var balanceForToken = await contract.methods.getBalanceForToken(req.query.symbolName).call({ from: req.query.addr });
+    res.json({
+      balanceForToken: balanceForToken
+    })
+  } 
+  catch (error) {
+    console.log(error);
+    return {
+      msg: "Error withdrawing token"
+    }
+  }
+});
+
 router.get('/getTokenAddress', async function(req, res) {
   try {
     var tokenAddress = await contract.methods.getTokenAddress(req.query.symbolName).call();
