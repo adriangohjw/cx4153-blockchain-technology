@@ -30,6 +30,24 @@ let web3 = new Web3(
 );
 const contract = new web3.eth.Contract(exchange_artifact.abi, local_ExchangeContractAddress);  // choose ExchangeContractAddress (ropsten testnet) / local_ExchangeContractAddress (local)
 
+async function getBuyOrderBook(symbolName) {
+  var buyOrderBook = await contract.methods.getBuyOrderBook(symbolName).call();
+  return {
+    indexes: buyOrderBook['0'],
+    prices: buyOrderBook['1'],
+    amounts: buyOrderBook['2']
+  }
+}
+
+async function getSellOrderBook(symbolName) {
+  var sellOrderBook = await contract.methods.getSellOrderBook(symbolName).call();
+  return {
+    indexes: sellOrderBook['0'],
+    prices: sellOrderBook['1'],
+    amounts: sellOrderBook['2']
+  }
+}
+
 router.post('/addToken', async function(req, res) {
   try {
     await contract.methods.addToken(req.query.symbolName, req.query.ecr20TokenAddress).send({ from: req.query.addr });
@@ -168,12 +186,8 @@ router.get('/getAllTokens', async function(req, res) {
 
 router.get('/getBuyOrderBook', async function(req, res) {
   try {
-    var buyOrderBook = await contract.methods.getBuyOrderBook(req.query.symbolName).call();
-    res.json({
-      indexes: buyOrderBook['0'],
-      prices: buyOrderBook['1'],
-      amounts: buyOrderBook['2']
-    })
+    var response = await getBuyOrderBook(req.query.symbolName);
+    res.json(response);
   }
   catch (error) {
     console.log(error);
@@ -185,12 +199,8 @@ router.get('/getBuyOrderBook', async function(req, res) {
 
 router.get('/getSellOrderBook', async function(req, res) {
   try {
-    var sellOrderBook = await contract.methods.getSellOrderBook(req.query.symbolName).call();
-    res.json({
-      indexes: sellOrderBook['0'],
-      prices: sellOrderBook['1'],
-      amounts: sellOrderBook['2']
-    })
+    var response = await getSellOrderBook(req.query.symbolName);
+    res.json(response);
   }
   catch (error) {
     console.log(error);
@@ -204,10 +214,11 @@ router.post('/buyToken', async function(req, res) {
   try {
     await contract.methods.buyToken(req.query.symbolName, req.query.priceInWei, req.query.amount)
                           .send({ from: req.query.addr, gas: 1000000 });
-    res.json({
-      success: true
-    })
-  } catch (error) {
+    
+    var response = await getBuyOrderBook(req.query.symbolName);
+    res.json(response);
+  } 
+  catch (error) {
     console.log(error);
     res.json({ 
       msg: `Error buying token`
@@ -219,10 +230,11 @@ router.post('/sellToken', async function(req, res) {
   try {
     await contract.methods.sellToken(req.query.symbolName, req.query.priceInWei, req.query.amount)
                           .send({ from: req.query.addr, gas: 1000000 });
-    res.json({
-      success: true
-    })
-  } catch (error) {
+
+    var response = await getSellOrderBook(req.query.symbolName);
+    res.json(response);
+  } 
+  catch (error) {
     console.log(error);
     res.json({ 
       msg: `Error buying token`
