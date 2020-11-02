@@ -15,11 +15,11 @@ const local_WSS = `ws://localhost:7545`;
 
 // contract owner's address
 const OwnerAddress = "0xfC4E8AFeF7AD2a37DF8Ad0C3Ce038E4196501Fbe"; // To change to your own testnet wallet address
-const local_OwnerAddress = "0x4a0c640B3A15314323D510afC8c32A805CF39Fbd"; // To change to your own local wallet address
+const local_OwnerAddress = "0x88455FbcC4C0869C69603880E43BD6A534d472e0"; // To change to your own local wallet address
 
 // contract address
 const ExchangeContractAddress = "0x1420180D527adfDcb7c17C8eA3a39C6b53b573Ab"; // To change to your own testnet contract address
-const local_ExchangeContractAddress = "0xB6029964f1fC92aB4E78aDe0C67a5EAc38E9dbbC"; // To change to your own local contract address
+const local_ExchangeContractAddress = "0x98b7dE6C91529F1e0fC7039b4357105ec3379926"; // To change to your own local contract address
 
 // testnet that contract is deployed on
 const Testnet = "ropsten";
@@ -138,6 +138,30 @@ router.get('/hasToken', async function(req, res) {
     console.log(error);
     res.json({
       msg: `Error determining if token exist`
+    })
+  }
+});
+
+router.get('/getAllTokens', async function(req, res) {
+  try {
+    var response = await contract.methods.getAllTokens().call();
+
+    var tokens = new Array();
+    for (var i=0; i < response['0'].length; i++) {
+      tokens.push({
+        symbolName: response['0'][i],
+        address: response['1'][i]
+      })
+    }
+    
+    res.json({
+      tokens: tokens
+    })
+  }
+  catch (error) {
+    console.log(error);
+    res.json({
+      msg: `Error getting all tokens`
     })
   }
 });
