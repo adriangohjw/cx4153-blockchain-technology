@@ -30,6 +30,22 @@ let web3 = new Web3(
 );
 const contract = new web3.eth.Contract(exchange_artifact.abi, local_ExchangeContractAddress);  // choose ExchangeContractAddress (ropsten testnet) / local_ExchangeContractAddress (local)
 
+// Exchange Contract - getBalanceForToken
+async function getBalanceForToken(addr, symbolName) {
+  try {
+    const balanceForToken = await contract.methods.getBalanceForToken(symbolName).call({ from: addr });
+    return { 
+      address: addr, 
+      balance: balanceForToken
+    };
+  } catch (error) {
+    console.log(error);
+    return { 
+      msg: "Error retrieving token balance"
+    };
+  }
+}
+
 // Exchange Contract - hasToken
 async function hasToken(symbolName) {
   try {
@@ -58,6 +74,13 @@ async function getEtherBalanceInWei(addr) {
     };
   }
 }
+
+router.get('/getBalanceForToken', async function(req, res) {
+  response = await getBalanceForToken(req.query.addr, req.query.symbolName);
+  res.json({
+    balanceForToken: response.balance
+  })
+});
 
 router.get('/hasToken', async function(req, res) {
   response = await hasToken(req.query.tokenSymbol);
