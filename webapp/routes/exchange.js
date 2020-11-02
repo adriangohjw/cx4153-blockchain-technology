@@ -93,6 +93,24 @@ async function getBuyOrderBook(symbolName) {
   }
 }
 
+// Exchange Contract - getSellOrderBook
+async function getSellOrderBook(symbolName) {
+  try {
+    const orderBook = await contract.methods.getSellOrderBook(symbolName).call();
+    return { 
+      indexes: orderBook['0'],
+      prices: orderBook['1'],
+      amounts: orderBook['2']
+    };
+  } 
+  catch (error) {
+    console.log(error);
+    return { 
+      msg: `Error retrieving orderBook for ${symbolName}`
+    };
+  }
+}
+
 router.get('/getBalanceForToken', async function(req, res) {
   response = await getBalanceForToken(req.query.addr, req.query.symbolName);
   res.json({
@@ -118,6 +136,15 @@ router.get('/getEtherBalanceInWei', async function(req, res) {
 
 router.get('/getBuyOrderBook', async function(req, res) {
   response = await getBuyOrderBook(req.query.symbolName);
+  res.json({
+    indexes: response.indexes,
+    prices: response.prices,
+    amounts: response.amounts
+  })
+});
+
+router.get('/getSellOrderBook', async function(req, res) {
+  response = await getSellOrderBook(req.query.symbolName);
   res.json({
     indexes: response.indexes,
     prices: response.prices,
