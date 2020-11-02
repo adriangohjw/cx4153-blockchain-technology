@@ -75,6 +75,24 @@ async function getEtherBalanceInWei(addr) {
   }
 }
 
+// Exchange Contract - getBuyOrderBook
+async function getBuyOrderBook(symbolName) {
+  try {
+    const orderBook = await contract.methods.getBuyOrderBook(symbolName).call();
+    return { 
+      indexes: orderBook['0'],
+      prices: orderBook['1'],
+      amounts: orderBook['2']
+    };
+  } 
+  catch (error) {
+    console.log(error);
+    return { 
+      msg: `Error retrieving orderBook for ${symbolName}`
+    };
+  }
+}
+
 router.get('/getBalanceForToken', async function(req, res) {
   response = await getBalanceForToken(req.query.addr, req.query.symbolName);
   res.json({
@@ -96,6 +114,15 @@ router.get('/getEtherBalanceInWei', async function(req, res) {
       etherBalanceInWei: response.balance
     })
   }
+});
+
+router.get('/getBuyOrderBook', async function(req, res) {
+  response = await getBuyOrderBook(req.query.symbolName);
+  res.json({
+    indexes: response.indexes,
+    prices: response.prices,
+    amounts: response.amounts
+  })
 });
 
 module.exports = router;
