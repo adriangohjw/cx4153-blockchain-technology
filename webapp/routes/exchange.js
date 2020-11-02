@@ -115,6 +115,13 @@ async function getSellOrderBook(symbolName) {
   }
 }
 
+router.post('/withdrawEther', async function(req, res) {
+  var etherBalanceInWei = await contract.methods.withdrawEther(req.query.amountInWei).send({ from: req.query.addr });
+  res.json({
+    etherBalanceInWei: etherBalanceInWei
+  })
+});
+
 router.get('/getEtherBalanceInWei', async function(req, res) {
   if (req.query.addr) {
     response = await getEtherBalanceInWei(req.query.addr);

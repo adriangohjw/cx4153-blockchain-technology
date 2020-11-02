@@ -28,26 +28,36 @@
 
     <div class="container-max-width">
 
-      <div class="container">
+      <div class="container mb-4">
         <div class="row">
           <div class="col-6">
             <img src="./images/logo.png" style="width: 40%; min-width: 150px; max-width: 200px;">
           </div>
         </div>
       </div>
-      <br>
 
-      <div class="container">
+      <div class="container mb-4">
         <button class="enableEthereumButton btn btn-sm btn-primary">Enable Ethereum</button>
         <p style="font-weight: bold;">Account: <span class="showAccount"></span></p>
         
-        <div class="form-group">
+        <div class="form-group mt-4">
           <label for="etherAmountToDeposit">Ether amount to deposit</label>
           <input type="number" class="form-control" id="etherAmountToDeposit" placeholder="Enter ether amount to deposit (min. 0.0001 eth)" min="0.0001" step="0.0001">
         </div>
         <button class="depositEtherButton btn btn-sm btn-primary">Deposit Ether</button>
-        <button class="btn btn-sm btn-primary" onclick="updateEtherBalance()">Update Ether balance</button>
-        <p style="font-weight: bold;">Ether balance: <span id="etherBalance"></span></p>
+        <br>
+
+        <div class="form-group mt-4">
+          <label for="etherAmountToWithdraw">Ether amount to withdraw</label>
+          <input type="number" class="form-control" id="etherAmountToWithdraw" placeholder="Enter ether amount to withdraw (min. 0.0001 eth)" min="0.0001" step="0.0001">
+        </div>
+        <button class="btn btn-sm btn-primary" id="withdrawEtherButton" onclick="withdrawEther()">Withdraw Ether</button>
+        <br>
+        
+        <div claa="mt-4">
+          <button class="btn btn-sm btn-primary" onclick="updateEtherBalance()">Update Ether balance</button>
+          <p style="font-weight: bold;">Ether balance: <span id="etherBalance"></span></p>
+        </div>
       </div>
       <br>
 
@@ -123,4 +133,21 @@
     })
     .catch((error) => console.error);
   });
+
+  async function withdrawEther() {
+    var amountInEther = document.getElementById("etherAmountToWithdraw").value;
+    if (amountInEther == "") {
+      console.log("Empty value input for etherAmountToWithdraw");
+      return;
+    }
+
+    var amountInWei = Web3.utils.toWei(amountInEther, 'ether');
+
+    await fetch(`exchange/withdrawEther?addr=${await getAccount()}&amountInWei=${amountInWei}`, {
+      method: 'POST',
+      credentials: 'same-origin'
+    });
+    
+    updateEtherBalance();
+  }
 </script>
