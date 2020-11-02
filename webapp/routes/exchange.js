@@ -80,6 +80,7 @@ async function getBuyOrderBook(symbolName) {
   try {
     const orderBook = await contract.methods.getBuyOrderBook(symbolName).call();
     return { 
+      is_success: true,
       indexes: orderBook['0'],
       prices: orderBook['1'],
       amounts: orderBook['2']
@@ -88,6 +89,7 @@ async function getBuyOrderBook(symbolName) {
   catch (error) {
     console.log(error);
     return { 
+      is_success: false,
       msg: `Error retrieving orderBook for ${symbolName}`
     };
   }
@@ -98,6 +100,7 @@ async function getSellOrderBook(symbolName) {
   try {
     const orderBook = await contract.methods.getSellOrderBook(symbolName).call();
     return { 
+      is_success: true,
       indexes: orderBook['0'],
       prices: orderBook['1'],
       amounts: orderBook['2']
@@ -106,6 +109,7 @@ async function getSellOrderBook(symbolName) {
   catch (error) {
     console.log(error);
     return { 
+      is_success: false,
       msg: `Error retrieving orderBook for ${symbolName}`
     };
   }
@@ -136,20 +140,34 @@ router.get('/getEtherBalanceInWei', async function(req, res) {
 
 router.get('/getBuyOrderBook', async function(req, res) {
   response = await getBuyOrderBook(req.query.symbolName);
-  res.json({
-    indexes: response.indexes,
-    prices: response.prices,
-    amounts: response.amounts
-  })
+  if (response.is_success) {
+    res.json({
+      indexes: response.indexes,
+      prices: response.prices,
+      amounts: response.amounts
+    })
+  }
+  else {
+    res.json({
+      msg: response.msg
+    })
+  }
 });
 
 router.get('/getSellOrderBook', async function(req, res) {
   response = await getSellOrderBook(req.query.symbolName);
-  res.json({
-    indexes: response.indexes,
-    prices: response.prices,
-    amounts: response.amounts
-  })
+  if (response.is_success) {
+    res.json({
+      indexes: response.indexes,
+      prices: response.prices,
+      amounts: response.amounts
+    })
+  }
+  else {
+    res.json({
+      msg: response.msg
+    })
+  }
 });
 
 module.exports = router;
