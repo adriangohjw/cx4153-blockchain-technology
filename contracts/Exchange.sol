@@ -159,6 +159,15 @@ contract Exchange is owned {
   }
 
 
+	function getTokenAddress(string memory symbolName) public view returns (address) {
+		require(hasToken(symbolName));
+
+		uint8 _tokenIndex = getTokenIndex(symbolName);	
+
+		return tokens[_tokenIndex].contractAddress;
+	}
+
+
 	function hasToken(string memory symbolName) public view returns (bool) {
 		return getTokenIndex(symbolName) > 0;
   }
