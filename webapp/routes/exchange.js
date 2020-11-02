@@ -200,4 +200,19 @@ router.get('/getSellOrderBook', async function(req, res) {
   }
 });
 
+router.post('/buyToken', async function(req, res) {
+  try {
+    await contract.methods.buyToken(req.query.symbolName, req.query.priceInWei, req.query.amount)
+                          .send({ from: req.query.addr, gas: 1000000 });
+    res.json({
+      success: true
+    })
+  } catch (error) {
+    console.log(error);
+    res.json({ 
+      msg: `Error buying token`
+    })
+  }
+})
+
 module.exports = router;
