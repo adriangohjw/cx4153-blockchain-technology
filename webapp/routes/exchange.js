@@ -57,6 +57,15 @@ async function getSellOrderBook(symbolName) {
   }
 }
 
+async function getAccountSellOrders(symbolName, addr) {
+  var sellOrderBook = await contract.methods.getAccountSellOrders(symbolName).call({ from: addr });
+  return {
+    indexes: sellOrderBook['0'],
+    prices: sellOrderBook['1'],
+    amounts: sellOrderBook['2']
+  }
+}
+
 router.post('/addToken', async function(req, res) {
   try {
     await contract.methods.addToken(req.query.symbolName, req.query.ecr20TokenAddress).send({ from: req.query.addr });
@@ -228,6 +237,19 @@ router.get('/getSellOrderBook', async function(req, res) {
     console.log(error);
     res.json({ 
       msg: `Error retrieving sellOrderBook`
+    })
+  }
+});
+
+router.get('/getAccountSellOrders', async function(req, res) {
+  try {
+    var response = await getAccountSellOrders(req.query.symbolName, req.query.addr);
+    res.json(response);
+  }
+  catch (error) {
+    console.log(error);
+    res.json({
+      msg: `Error retrieving getAccountSellOrders`
     })
   }
 });
