@@ -83,8 +83,6 @@ Steps to install:
 
 2. Reach out to me with your address to get some ERC20 tokens for testing
 3. Run `npm start` to get the server and go to [localhost:3000](http://localhost:3000/)
-   - Alternatively, I hosted it on DigitalOcean [here](https://cx-4153-blockchain-technology-3q6dx.ondigitalocean.app/)
-   - NOTE: Will probably take this down in a few weeks / months time (when my digitalocean credits run dry). Thus, depending on when you are reading this, it might no longer be available
 
 
 ## Author 
