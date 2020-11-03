@@ -30,6 +30,32 @@
     box-shadow: 0 0 11px rgba(33,33,33,.2);
   }
 
+  .buyTokenButton {
+    color: white;
+    background-color: var(--buy)
+  }
+  .buyTokenButton:hover {
+    color: white;
+    background-color: var(--buy-light)
+  }
+  .buyTokenButton:focus {
+    color: white;
+    background-color: var(--buy-light)
+  }
+
+  .sellTokenButton {
+    color: white;
+    background-color: var(--sell)
+  }
+  .sellTokenButton:hover {
+    color: white;
+    background-color: var(--sell-light)
+  }
+  .sellTokenButton:focus {
+    color: white;
+    background-color: var(--sell-light)
+  }
+
   .buy-order-row {
     color: var(--buy);
     background-color: var(--buy-light);

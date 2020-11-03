@@ -73,37 +73,40 @@
             </div>
           </div>
 
-          
-          <div class="container main-dashboard">
-            <div class="row mt-3 mb-3">
-              <div class="col">
-                <h4 style="color: var(--buy)">Buy Token</h4>
-                <div class="row">
-                  <div class="col form-group">
-                    <label for="buyTokenPrice">Price</label>
-                    <input type="number" class="form-control form-control-sm" id="buyTokenPrice">
+          <div class="row">
+            <div class="col">
+              <div class="container main-dashboard">
+                <div class="row mt-3 mb-3">
+                  <div class="col">
+                    <h4 style="color: var(--buy)">Buy Token</h4>
+                    <div class="row">
+                      <div class="col form-group">
+                        <label for="buyTokenPrice">Price</label>
+                        <input type="number" class="form-control form-control-sm" id="buyTokenPrice" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+                      </div>
+                      <div class="col form-group">
+                        <label for="buyTokenAmount">Amount</label>
+                        <input type="number" class="form-control form-control-sm" id="buyTokenAmount" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+                      </div>
+                    </div>
+                    <button class="btn btn-sm buyTokenButton" onclick="buyToken()">Buy</button>
                   </div>
-                  <div class="col form-group">
-                    <label for="buyTokenAmount">Amount</label>
-                    <input type="number" class="form-control form-control-sm" id="buyTokenAmount">
+    
+                  <div class="col">
+                    <h4 style="color: var(--sell)">Sell Token</h4>
+                    <div class="row">
+                      <div class="col form-group">
+                        <label for="sellTokenPrice">Price</label>
+                        <input type="number" class="form-control form-control-sm" id="sellTokenPrice" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+                      </div>
+                      <div class="col form-group">
+                        <label for="sellTokenAmount">Amount</label>
+                        <input type="number" class="form-control form-control-sm" id="sellTokenAmount" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+                      </div>
+                    </div>
+                    <button class="btn btn-sm sellTokenButton" onclick="sellToken()">Sell</button>
                   </div>
                 </div>
-                <button class="buyTokenButton btn btn-sm btn-primary">Buy</button>
-              </div>
-
-              <div class="col">
-                <h4 style="color: var(--sell)">Sell Token</h4>
-                <div class="row">
-                  <div class="col form-group">
-                    <label for="sellTokenPrice">Price</label>
-                    <input type="number" class="form-control form-control-sm" id="sellTokenPrice">
-                  </div>
-                  <div class="col form-group">
-                    <label for="sellTokenAmount">Amount</label>
-                    <input type="number" class="form-control form-control-sm" id="sellTokenAmount">
-                  </div>
-                </div>
-                <button class="sellTokenButton btn btn-sm btn-primary">Sell</button>
               </div>
             </div>
           </div>
@@ -121,6 +124,9 @@
                     </tr>
                   </thead>
                   <tbody>
+                    <tr>
+                      <td>No token selected</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -136,6 +142,9 @@
                     </tr>
                   </thead>
                   <tbody>
+                    <tr>
+                      <td>No token selected</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -281,6 +290,46 @@
   $(document).ready(async function() {
     await updateEtherBalance();
   });
+
+  async function buyToken() {
+    var symbolName = document.getElementById("selectpicker-token").value;
+    if (symbolName == "") return;
+
+    var buyTokenPrice = document.getElementById("buyTokenPrice").value;
+    if (buyTokenPrice == "") return;
+
+    var buyTokenAmount = document.getElementById("buyTokenAmount").value;
+    if (buyTokenAmount == "") return;
+
+    await fetch(`exchange/buyToken?addr=${await getAccount()}&symbolName=${symbolName}&priceInWei=${buyTokenPrice}&amount=${buyTokenAmount}`, {
+      method: 'POST',
+      credentials: 'same-origin'
+    });
+
+    await refreshOrderBooks();
+
+    alert("Buy order made");
+  }
+
+  async function sellToken() {
+    var symbolName = document.getElementById("selectpicker-token").value;
+    if (symbolName == "") return;
+
+    var sellTokenPrice = document.getElementById("sellTokenPrice").value;
+    if (sellTokenPrice == "") return;
+
+    var sellTokenAmount = document.getElementById("sellTokenAmount").value;
+    if (sellTokenAmount == "") return;
+
+    await fetch(`exchange/sellToken?addr=${await getAccount()}&symbolName=${symbolName}&priceInWei=${sellTokenPrice}&amount=${sellTokenAmount}`, {
+      method: 'POST',
+      credentials: 'same-origin'
+    });
+
+    await refreshOrderBooks();
+
+    alert("Sell order made");
+  }
 
   $('#selectpicker-token').on('change', async function(e) {
     updateOrderTables(this.value);
