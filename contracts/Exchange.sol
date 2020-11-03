@@ -277,6 +277,38 @@ contract Exchange is owned {
   }
 
 
+	function getAccountSellOrders(string memory symbolName) public view returns (uint[] memory, uint[] memory, uint[] memory) {
+		require(hasToken(symbolName));
+
+		uint8 _tokenIndex = getTokenIndex(symbolName);
+
+		(uint[] memory indexes, uint[] memory prices, uint[] memory amounts) = getSellOrderBook(symbolName);
+		uint _accountOrdersCount = 0;
+
+		uint[] memory _tempIndexes = new uint[](tokens[_tokenIndex].sellOrderBook.ordersCount);
+
+		for (uint i = 0; i < tokens[_tokenIndex].sellOrderBook.ordersCount; i++) {
+			uint _orderIndex = indexes[i];
+			if (tokens[_tokenIndex].sellOrderBook.orders[_orderIndex].who == msg.sender) {
+				_tempIndexes[_accountOrdersCount] = _orderIndex;
+				_accountOrdersCount++;
+			}
+		}
+
+		uint[] memory _accountIndexes = new uint[](_accountOrdersCount);
+		uint[] memory _accountPrices = new uint[](_accountOrdersCount);
+		uint[] memory _accountAmounts = new uint[](_accountOrdersCount);
+
+		for (uint j = 0; j < _accountOrdersCount; j++) {
+			_accountIndexes[j] = _tempIndexes[j];
+			_accountPrices[j] = tokens[_tokenIndex].sellOrderBook.orders[_tempIndexes[j]].price;
+			_accountAmounts[j] = tokens[_tokenIndex].sellOrderBook.orders[_tempIndexes[j]].amount;
+		}
+
+		return (_accountIndexes, _accountPrices, _accountAmounts);
+	}
+
+
 	// Create orders (buy / sell)
 
 	function createBuyOrder(string memory symbolName, uint priceInWei, uint amount, address buyer) private {
