@@ -6066,12 +6066,12 @@
         }
       },
       "links": {},
-      "address": "0xaFBe25f0BE3E4b09E905dD7Ed753524721148FA4",
-      "transactionHash": "0xe4d8e7500b203f4ef1da7435cc5d5f1c689fa2a63e0aed1a90f54ee70d9eb831"
+      "address": "0x6F96Bf45B0D4039dd646D4917abE0d93aC4D6452",
+      "transactionHash": "0xbea2384a1276c619dd2860b2af7dc99c321416597d9381f104af4c885915a222"
     }
   },
   "schemaVersion": "3.2.5",
-  "updatedAt": "2020-11-03T12:40:51.703Z",
+  "updatedAt": "2020-11-03T14:10:04.785Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}
