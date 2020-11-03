@@ -400,7 +400,7 @@
 
   async function updateOrderTables(symbolName) {
     updateBuyOrderTable(await getBuyOrderBook(symbolName));
-    updateAccountBuyOrderTable(await getAccountSellOrderBook(symbolName));
+    updateAccountBuyOrderTable(await getAccountBuyOrderBook(symbolName));
     updateSellOrderTable(await getSellOrderBook(symbolName));
     updateAccountSellOrderTable(await getAccountSellOrderBook(symbolName));
   }
@@ -570,6 +570,14 @@
         button.classList.add("btn-sm");
         button.classList.add("sellTokenButton");
         button.innerHTML = "Cancel";
+        button.onclick = async function cancelSellOrder() {
+          var symbolName = document.getElementById("selectpicker-token").value;
+          await fetch(`exchange/cancelSellOrder?addr=${await getAccount()}&symbolName=${symbolName}&orderIndex=${button.id}`, {
+            method: 'POST',
+            credentials: 'same-origin'
+          });
+          refreshOrderBooks();
+        };
         cellTotal.appendChild(button);
       }
     }
