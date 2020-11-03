@@ -63,6 +63,12 @@
       <div class="tab-content d-flex" id="myTabContent" style="flex: 1 1 0">
         <div id="exchange" class="tab-pane fade show active pt-3 w-100">
 
+          <div class="row mb-2">
+            <div class="col">
+              <h4>Token supported:</h4>
+            </div>
+          </div>
+          
           <div class="row">
             <div class="col">
               <select id="selectpicker-token" class="selectpicker show-tick mb-4" title="Choose one of the following..." data-live-search="true" data-size="5" data-style="selectpicker">
@@ -73,83 +79,85 @@
             </div>
           </div>
 
-          <div class="row">
-            <div class="col">
-              <div class="container main-dashboard">
-                <div class="row mt-3 mb-3">
-                  <div class="col">
-                    <h4 style="color: var(--buy)">Buy Token</h4>
-                    <div class="row">
-                      <div class="col form-group">
-                        <label for="buyTokenPrice">Price</label>
-                        <input type="number" class="form-control form-control-sm" id="buyTokenPrice" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+          <div id="tokenInteractionComponent" style="display: none;">
+            <div class="row">
+              <div class="col">
+                <div class="container main-dashboard">
+                  <div class="row mt-3 mb-3">
+                    <div class="col">
+                      <h4 style="color: var(--buy)">Buy Token</h4>
+                      <div class="row">
+                        <div class="col form-group">
+                          <label for="buyTokenPrice">Price</label>
+                          <input type="number" class="form-control form-control-sm" id="buyTokenPrice" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+                        </div>
+                        <div class="col form-group">
+                          <label for="buyTokenAmount">Amount</label>
+                          <input type="number" class="form-control form-control-sm" id="buyTokenAmount" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+                        </div>
                       </div>
-                      <div class="col form-group">
-                        <label for="buyTokenAmount">Amount</label>
-                        <input type="number" class="form-control form-control-sm" id="buyTokenAmount" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
-                      </div>
+                      <button class="btn btn-sm buyTokenButton" onclick="buyToken()">Buy</button>
                     </div>
-                    <button class="btn btn-sm buyTokenButton" onclick="buyToken()">Buy</button>
-                  </div>
-    
-                  <div class="col">
-                    <h4 style="color: var(--sell)">Sell Token</h4>
-                    <div class="row">
-                      <div class="col form-group">
-                        <label for="sellTokenPrice">Price</label>
-                        <input type="number" class="form-control form-control-sm" id="sellTokenPrice" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+      
+                    <div class="col">
+                      <h4 style="color: var(--sell)">Sell Token</h4>
+                      <div class="row">
+                        <div class="col form-group">
+                          <label for="sellTokenPrice">Price</label>
+                          <input type="number" class="form-control form-control-sm" id="sellTokenPrice" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+                        </div>
+                        <div class="col form-group">
+                          <label for="sellTokenAmount">Amount</label>
+                          <input type="number" class="form-control form-control-sm" id="sellTokenAmount" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
+                        </div>
                       </div>
-                      <div class="col form-group">
-                        <label for="sellTokenAmount">Amount</label>
-                        <input type="number" class="form-control form-control-sm" id="sellTokenAmount" placeholder="Min. 0.0001" min="0.0001" step="0.0001">
-                      </div>
+                      <button class="btn btn-sm sellTokenButton" onclick="sellToken()">Sell</button>
                     </div>
-                    <button class="btn btn-sm sellTokenButton" onclick="sellToken()">Sell</button>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <br>
+            <br>
 
-          <div class="row">
-            <div class="col">
-              <div class="container main-dashboard">
-                <table class="table" id="buy-order-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Buy Price (ETH)</th>
-                      <th scope="col">Amount</th>
-                      <th scope="col">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>No token selected</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <div class="row">
+              <div class="col">
+                <div class="container main-dashboard">
+                  <table class="table" id="buy-order-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Buy Price (ETH)</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>No token selected</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="col">
+                <div class="container main-dashboard">
+                  <table class="table" id="sell-order-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Sell Price (ETH)</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>No token selected</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-            <div class="col">
-              <div class="container main-dashboard">
-                <table class="table" id="sell-order-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Sell Price (ETH)</th>
-                      <th scope="col">Amount</th>
-                      <th scope="col">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>No token selected</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+        </div>
           
         </div>
         <div id="settings" class="tab-pane fade show pt-3 w-100">
@@ -332,7 +340,14 @@
   }
 
   $('#selectpicker-token').on('change', async function(e) {
-    updateOrderTables(this.value);
+    var component = document.getElementById("tokenInteractionComponent");
+    if (this.value == "") {
+      component.style.display = "none";
+    }
+    else {
+      await updateOrderTables(this.value);
+      component.style.display = "block";
+    }
   });
 
   async function updateOrderTables(symbolName) {
