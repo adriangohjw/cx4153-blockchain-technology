@@ -85,6 +85,16 @@
                 <div class="container main-dashboard">
                   <div class="row mt-3 mb-3">
                     <div class="col">
+                      <h4>My balances</h4>
+                      <div class="row mt-3 mb-3">
+                        <div class="col">
+                          <p><span style="font-weight: bold;">Ether: </span> <span id="exchangeEtherBalance">-</span></p>
+                          <p><span style="font-weight: bold;">Token: </span> <span id="exchangeTokenBalance">-</span></p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col">
                       <h4 style="color: var(--buy)">Buy Token</h4>
                       <div class="row">
                         <div class="col form-group">
@@ -401,6 +411,8 @@
   });
 
   async function updateOrderTables(symbolName) {
+    await updateEtherBalance();
+    await updateExchangeTokenBalance();
     updateBuyOrderTable(await getBuyOrderBook(symbolName));
     updateAccountBuyOrderTable(await getAccountBuyOrderBook(symbolName));
     updateSellOrderTable(await getSellOrderBook(symbolName));
@@ -628,7 +640,8 @@
 
   async function updateEtherBalance() {
     var etherBalanceInWei = await getEtherBalanceInWei();
-    document.getElementById("etherBalance").innerHTML = web3.utils.fromWei(etherBalanceInWei, 'ether');;
+    document.getElementById("exchangeEtherBalance").innerHTML = web3.utils.fromWei(etherBalanceInWei, 'ether');
+    document.getElementById("etherBalance").innerHTML = web3.utils.fromWei(etherBalanceInWei, 'ether');
   }
 
   const depositEtherButton = document.querySelector('.depositEtherButton');
@@ -695,6 +708,22 @@
     var tokenBalance = res.balanceForToken;
 
     return tokenBalance;
+  }
+
+  async function updateExchangeTokenBalance() {
+    var symbolName = document.getElementById("selectpicker-token").value;
+
+    // get tokenBalance
+    response = await fetch(`exchange/getBalanceForToken?symbolName=${symbolName}&addr=${await getAccount()}`, {
+      method: 'GET',
+      credentials: 'same-origin'
+    });
+    
+    res = await response.json();
+    var tokenBalance = res.balanceForToken;
+
+    // update tokenBalance
+    document.getElementById("exchangeTokenBalance").innerHTML = tokenBalance;
   }
 
   async function updateTokenBalance() {
