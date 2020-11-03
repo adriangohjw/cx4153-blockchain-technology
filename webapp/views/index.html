@@ -27,6 +27,9 @@
       function initialize(i,t){var e;i.getElementById(t)?initFreshChat():((e=i.createElement("script")).id=t,e.async=!0,e.src="https://wchat.freshchat.com/js/widget.js",e.onload=initFreshChat,i.head.appendChild(e))}function initiateCall(){initialize(document,"freshchat-js-sdk")}window.addEventListener?window.addEventListener("load",initiateCall,!1):window.attachEvent("load",initiateCall,!1);
     </script>
 
+    <!-- font awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
     <title>aDEX</title>
   </head>
 
@@ -60,12 +63,49 @@
       <div class="tab-content d-flex" id="myTabContent" style="flex: 1 1 0">
         <div id="exchange" class="tab-pane fade show active pt-3 w-100">
 
-          <select id="selectpicker-token" class="selectpicker show-tick mb-4" title="Choose one of the following..." data-live-search="true" data-size="5" data-style="selectpicker">
-          </select>
-
-          <div class="container main-dashboard">
-            hello<br>
+          <div class="row">
+            <div class="col">
+              <select id="selectpicker-token" class="selectpicker show-tick mb-4" title="Choose one of the following..." data-live-search="true" data-size="5" data-style="selectpicker">
+              </select>
+            </div>
+            <div class="col">
+              <button class="btn btn-sm btn-primary" style="float: right;" onclick="refreshOrderBooks()"><i class="fa fa-refresh"></i></button>
+            </div>
           </div>
+
+          <div class="row">
+            <div class="col">
+              <div class="container main-dashboard">
+                <table class="table" id="buy-order-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Buy Price (ETH)</th>
+                      <th scope="col">Amount</th>
+                      <th scope="col">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="col">
+              <div class="container main-dashboard">
+                <table class="table" id="sell-order-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Sell Price (ETH)</th>
+                      <th scope="col">Amount</th>
+                      <th scope="col">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
         </div>
         <div id="settings" class="tab-pane fade show pt-3 w-100">
           <div class="container mb-4">
@@ -205,6 +245,98 @@
   $(document).ready(async function() {
     await updateEtherBalance();
   });
+
+  $('#selectpicker-token').on('change', async function(e) {
+    updateOrderTables(this.value);
+  });
+
+  async function updateOrderTables(symbolName) {
+    updateBuyOrderTable(await getBuyOrderBook(symbolName));
+    updateSellOrderTable(await getSellOrderBook(symbolName));   
+  }
+
+  async function getBuyOrderBook(symbolName) {
+    var res = await fetch(`exchange/getBuyOrderBook?symbolName=${symbolName}`, {
+      method: 'GET',
+      credentials: 'same-origin'
+    });
+    var buyOrderBook = await res.json();
+    return buyOrderBook;
+  }
+
+  async function getSellOrderBook(symbolName) {
+    var res = await fetch(`exchange/getSellOrderBook?symbolName=${symbolName}`, {
+      method: 'GET',
+      credentials: 'same-origin'
+    });
+    var sellOrderBook = await res.json();
+    return sellOrderBook;
+  }
+  
+  async function updateBuyOrderTable(buyOrderBook) {
+    /// create new body with new rows
+    var newBuyOrderTableBody = document.createElement('tbody');
+    if (buyOrderBook.indexes.length == 0) {
+      var newRow = newBuyOrderTableBody.insertRow(0);
+      var cell = newRow.insertCell(0);
+      cell.innerHTML = "New buy orders found";
+    }
+    else {
+      for (i=0; i<buyOrderBook.indexes.length; i++) {
+        var newRow = newBuyOrderTableBody.insertRow(i);
+        newRow.classList.add("buy-order-row");
+  
+        var cellPrice = newRow.insertCell(0);
+        cellPrice.innerHTML = buyOrderBook.prices[i];
+        cellPrice.style.fontWeight = "bold";
+  
+        var cellAmount = newRow.insertCell(1);
+        cellAmount.innerHTML = buyOrderBook.amounts[i];
+  
+        var cellTotal = newRow.insertCell(2);
+        cellTotal.innerHTML = cellPrice.innerHTML * cellAmount.innerHTML;
+      }
+    }
+    
+    /// replace old body with new body
+    var buyOrderTableBody = document.getElementById("buy-order-table").getElementsByTagName('tbody')[0];
+    buyOrderTableBody.parentNode.replaceChild(newBuyOrderTableBody, buyOrderTableBody);
+  }
+
+  async function updateSellOrderTable(sellOrderBook) {
+    /// create new body with new rows
+    var newSellOrderTableBody = document.createElement('tbody');
+    if (sellOrderBook.indexes.length == 0) {
+      var newRow = newSellOrderTableBody.insertRow(0);
+      var cell = newRow.insertCell(0);
+      cell.innerHTML = "New sell orders found";
+    }
+    else {
+      for (i=0; i<sellOrderBook.indexes.length; i++) {
+        var newRow = newSellOrderTableBody.insertRow(i);
+        newRow.classList.add("sell-order-row");
+  
+        var cellPrice = newRow.insertCell(0);
+        cellPrice.innerHTML = sellOrderBook.prices[i];
+        cellPrice.style.fontWeight = "bold";
+  
+        var cellAmount = newRow.insertCell(1);
+        cellAmount.innerHTML = sellOrderBook.amounts[i];
+  
+        var cellTotal = newRow.insertCell(2);
+        cellTotal.innerHTML = cellPrice.innerHTML * cellAmount.innerHTML;
+      }
+    }
+    
+    /// replace old body with new body
+    var sellOrderTableBody = document.getElementById("sell-order-table").getElementsByTagName('tbody')[0];
+    sellOrderTableBody.parentNode.replaceChild(newSellOrderTableBody, sellOrderTableBody);
+  }
+
+  async function refreshOrderBooks() {
+    var symbolName = document.getElementById("selectpicker-token").value;
+    updateOrderTables(symbolName);
+  }
 
   const ethereumButton = document.querySelector('.enableEthereumButton');
   const showAccount = document.querySelector('.showAccount');
