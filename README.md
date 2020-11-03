@@ -29,6 +29,8 @@ It is assumed that the following pre-requisits are met:
 - npm (v6.13.4) installed
 - MetaMask Extension and created at least 1 account
 - Truffle v5.1.45 (core: 5.1.45) installed
+- Infura account setup with at least one set of endpoints
+- Ganache (for running local blockchain)
 
 Steps to install:
 1. Clone this repository
@@ -36,6 +38,15 @@ Steps to install:
 3. Run `cd webapp && npm install`
 
 ## Usage
+
+### Adding secrets
+
+1. Create a file called `secret.js` in the root directory
+   ```javascript
+   const secrets = {
+      infuraKey: "xxx" // this should be your infuraKey
+    };
+   ```
 
 ### To choose local or testnet
 
@@ -48,8 +59,9 @@ Steps to install:
       var exchangeContractAddress = "0x641Ad5725E9C2AFb7f7936c3E45711E5dc08D3b5";
     }
     else {
-      // local
-      ...
+      // development - to update this
+      var infuraWSS = `ws://localhost:7545`;
+      var exchangeContractAddress = "0xB4C0ed7Ad8616c450A688218eaFABE5f0a45Cdf8";
     }
     ```
   
@@ -62,17 +74,19 @@ Steps to install:
       var exchangeContractAddress = "0x641Ad5725E9C2AFb7f7936c3E45711E5dc08D3b5";
     }
     else {
-      // local
-      ...
+      // development - to update  this
+      var infuraHttp = `http://localhost:7545`;
+      var exchangeContractAddress = "0xB4C0ed7Ad8616c450A688218eaFABE5f0a45Cdf8";
     }
     ```
-
 
 ### For local blockchain network
 1. Run `npm start` to get the server running
 2. Go to [localhost:3000](http://localhost:3000/)
 
-### For testnet (ropsten) network
+### For testnet (ropsten) network (Ignore)
+
+NOTE: Turns out the code faces some last minute problem because Infura doesn't support sending non-raw transactions. 
 1. Add tokens to your Metamask wallet (Reference: [Adding custom tokens to Metamask](https://metamask.zendesk.com/hc/en-us/articles/360015489031-How-to-View-See-Your-Tokens-in-Metamask))
 
       | Token Name | Contract Address                           | Symbol Name | Decimals |
