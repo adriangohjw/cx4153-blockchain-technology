@@ -15,11 +15,11 @@ const local_WSS = `ws://localhost:7545`;
 
 // contract owner's address
 const OwnerAddress = "0xfC4E8AFeF7AD2a37DF8Ad0C3Ce038E4196501Fbe"; // To change to your own testnet wallet address
-const local_OwnerAddress = "0x88455FbcC4C0869C69603880E43BD6A534d472e0"; // To change to your own local wallet address
+const local_OwnerAddress = "0x791A190915d32b34b1C89Dc641889926fBB6A252"; // To change to your own local wallet address
 
 // contract address
 const ExchangeContractAddress = "0x1420180D527adfDcb7c17C8eA3a39C6b53b573Ab"; // To change to your own testnet contract address
-const local_ExchangeContractAddress = "0x98b7dE6C91529F1e0fC7039b4357105ec3379926"; // To change to your own local contract address
+const local_ExchangeContractAddress = "0xA794DEbE2AE323c6583d7eB8C144891b76dd3084"; // To change to your own local contract address
 
 // testnet that contract is deployed on
 const Testnet = "ropsten";
@@ -32,6 +32,15 @@ const contract = new web3.eth.Contract(exchange_artifact.abi, local_ExchangeCont
 
 async function getBuyOrderBook(symbolName) {
   var buyOrderBook = await contract.methods.getBuyOrderBook(symbolName).call();
+  return {
+    indexes: buyOrderBook['0'],
+    prices: buyOrderBook['1'],
+    amounts: buyOrderBook['2']
+  }
+}
+
+async function getAccountBuyOrders(symbolName, addr) {
+  var buyOrderBook = await contract.methods.getAccountBuyOrders(symbolName).call({ from: addr });
   return {
     indexes: buyOrderBook['0'],
     prices: buyOrderBook['1'],
@@ -193,6 +202,19 @@ router.get('/getBuyOrderBook', async function(req, res) {
     console.log(error);
     res.json({
       msg: `Error retrieving buyOrderBook`
+    })
+  }
+});
+
+router.get('/getAccountBuyOrders', async function(req, res) {
+  try {
+    var response = await getAccountBuyOrders(req.query.symbolName, req.query.addr);
+    res.json(response);
+  }
+  catch (error) {
+    console.log(error);
+    res.json({
+      msg: `Error retrieving getAccountBuyOrders`
     })
   }
 });
