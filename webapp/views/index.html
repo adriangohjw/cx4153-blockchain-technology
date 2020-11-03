@@ -122,6 +122,54 @@
             <div class="row">
               <div class="col">
                 <div class="container main-dashboard">
+                  <div class="mt-3 mb-3">
+                  <h4 style="color: var(--buy)">My buy orders</h4>               
+                    <table class="table" id="account-buy-order-table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Buy Price (ETH)</th>
+                          <th scope="col">Amount</th>
+                          <th scope="col">Total</th>
+                          <th scope="col">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>No orders</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="container main-dashboard">
+                  <div class="mt-3 mb-3">
+                    <h4 style="color: var(--sell)">My sell orders</h4>
+                    <table class="table" id="account-sell-order-table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Sell Price (ETH)</th>
+                          <th scope="col">Amount</th>
+                          <th scope="col">Total</th>
+                          <th scope="col">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>No orders</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <br>
+
+            <div class="row">
+              <div class="col">
+                <div class="container main-dashboard">
                   <table class="table" id="buy-order-table">
                     <thead>
                       <tr>
@@ -157,9 +205,9 @@
                 </div>
               </div>
             </div>
+          </div>
         </div>
-          
-        </div>
+        
         <div id="settings" class="tab-pane fade show pt-3 w-100">
           <div class="container mb-4">
             <div class="header mb-3">
@@ -352,7 +400,9 @@
 
   async function updateOrderTables(symbolName) {
     updateBuyOrderTable(await getBuyOrderBook(symbolName));
-    updateSellOrderTable(await getSellOrderBook(symbolName));   
+    updateAccountBuyOrderTable(await getAccountSellOrderBook(symbolName));
+    updateSellOrderTable(await getSellOrderBook(symbolName));
+    updateAccountSellOrderTable(await getAccountSellOrderBook(symbolName));
   }
 
   async function getBuyOrderBook(symbolName) {
@@ -364,6 +414,15 @@
     return buyOrderBook;
   }
 
+  async function getAccountBuyOrderBook(symbolName) {
+    var res = await fetch(`exchange/getAccountBuyOrders?addr=${await getAccount()}&symbolName=${symbolName}`, {
+      method: 'GET',
+      credentials: 'same-origin'
+    });
+    var accountBuyOrderBook = await res.json();
+    return accountBuyOrderBook;
+  }
+
   async function getSellOrderBook(symbolName) {
     var res = await fetch(`exchange/getSellOrderBook?symbolName=${symbolName}`, {
       method: 'GET',
@@ -372,6 +431,15 @@
     var sellOrderBook = await res.json();
     return sellOrderBook;
   }
+
+  async function getAccountSellOrderBook(symbolName) {
+    var res = await fetch(`exchange/getAccountSellOrders?addr=${await getAccount()}&symbolName=${symbolName}`, {
+      method: 'GET',
+      credentials: 'same-origin'
+    });
+    var accountSellOrderBook = await res.json();
+    return accountSellOrderBook;
+  }
   
   async function updateBuyOrderTable(buyOrderBook) {
     /// create new body with new rows
@@ -379,7 +447,7 @@
     if (buyOrderBook.indexes.length == 0) {
       var newRow = newBuyOrderTableBody.insertRow(0);
       var cell = newRow.insertCell(0);
-      cell.innerHTML = "New buy orders found";
+      cell.innerHTML = "No buy orders found";
     }
     else {
       for (i=0; i<buyOrderBook.indexes.length; i++) {
@@ -403,13 +471,52 @@
     buyOrderTableBody.parentNode.replaceChild(newBuyOrderTableBody, buyOrderTableBody);
   }
 
+  async function updateAccountBuyOrderTable(accountBuyOrderBook) {
+    /// create new body with new rows
+    var newBuyOrderTableBody = document.createElement('tbody');
+    if (accountBuyOrderBook.indexes.length == 0) {
+      var newRow = newBuyOrderTableBody.insertRow(0);
+      var cell = newRow.insertCell(0);
+      cell.innerHTML = "No buy orders found";
+    }
+    else {
+      for (i=0; i<accountBuyOrderBook.indexes.length; i++) {
+        var newRow = newBuyOrderTableBody.insertRow(i);
+        newRow.classList.add("buy-order-row");
+  
+        var cellPrice = newRow.insertCell(0);
+        cellPrice.innerHTML = accountBuyOrderBook.prices[i];
+        cellPrice.style.fontWeight = "bold";
+  
+        var cellAmount = newRow.insertCell(1);
+        cellAmount.innerHTML = accountBuyOrderBook.amounts[i];
+  
+        var cellTotal = newRow.insertCell(2);
+        cellTotal.innerHTML = cellPrice.innerHTML * cellAmount.innerHTML;
+
+        var cellTotal = newRow.insertCell(3);
+        var button = document.createElement("button");
+        button.id = accountBuyOrderBook.indexes[i];
+        button.classList.add("btn");
+        button.classList.add("btn-sm");
+        button.classList.add("buyTokenButton");
+        button.innerHTML = "Cancel";
+        cellTotal.appendChild(button);
+      }
+    }
+    
+    /// replace old body with new body
+    var buyOrderTableBody = document.getElementById("account-buy-order-table").getElementsByTagName('tbody')[0];
+    buyOrderTableBody.parentNode.replaceChild(newBuyOrderTableBody, buyOrderTableBody);
+  }
+
   async function updateSellOrderTable(sellOrderBook) {
     /// create new body with new rows
     var newSellOrderTableBody = document.createElement('tbody');
     if (sellOrderBook.indexes.length == 0) {
       var newRow = newSellOrderTableBody.insertRow(0);
       var cell = newRow.insertCell(0);
-      cell.innerHTML = "New sell orders found";
+      cell.innerHTML = "No sell orders found";
     }
     else {
       for (i=0; i<sellOrderBook.indexes.length; i++) {
@@ -430,6 +537,45 @@
     
     /// replace old body with new body
     var sellOrderTableBody = document.getElementById("sell-order-table").getElementsByTagName('tbody')[0];
+    sellOrderTableBody.parentNode.replaceChild(newSellOrderTableBody, sellOrderTableBody);
+  }
+
+  async function updateAccountSellOrderTable(accountSellOrderBook) {
+    /// create new body with new rows
+    var newSellOrderTableBody = document.createElement('tbody');
+    if (accountSellOrderBook.indexes.length == 0) {
+      var newRow = newSellOrderTableBody.insertRow(0);
+      var cell = newRow.insertCell(0);
+      cell.innerHTML = "No sell orders found";
+    }
+    else {
+      for (i=0; i<accountSellOrderBook.indexes.length; i++) {
+        var newRow = newSellOrderTableBody.insertRow(i);
+        newRow.classList.add("sell-order-row");
+  
+        var cellPrice = newRow.insertCell(0);
+        cellPrice.innerHTML = accountSellOrderBook.prices[i];
+        cellPrice.style.fontWeight = "bold";
+  
+        var cellAmount = newRow.insertCell(1);
+        cellAmount.innerHTML = accountSellOrderBook.amounts[i];
+  
+        var cellTotal = newRow.insertCell(2);
+        cellTotal.innerHTML = cellPrice.innerHTML * cellAmount.innerHTML;
+
+        var cellTotal = newRow.insertCell(3);
+        var button = document.createElement("button");
+        button.id = accountSellOrderBook.indexes[i];
+        button.classList.add("btn");
+        button.classList.add("btn-sm");
+        button.classList.add("sellTokenButton");
+        button.innerHTML = "Cancel";
+        cellTotal.appendChild(button);
+      }
+    }
+    
+    /// replace old body with new body
+    var sellOrderTableBody = document.getElementById("account-sell-order-table").getElementsByTagName('tbody')[0];
     sellOrderTableBody.parentNode.replaceChild(newSellOrderTableBody, sellOrderTableBody);
   }
 

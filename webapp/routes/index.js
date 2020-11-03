@@ -7,7 +7,7 @@ const local_Http = `http://localhost:7545`;
 
 // contract address
 const ExchangeContractAddress = "0x1420180D527adfDcb7c17C8eA3a39C6b53b573Ab"; // To change to your own testnet contract address
-const local_ExchangeContractAddress = "0x98b7dE6C91529F1e0fC7039b4357105ec3379926"; // To change to your own local contract address
+const local_ExchangeContractAddress = "0xA794DEbE2AE323c6583d7eB8C144891b76dd3084"; // To change to your own local contract address
 
 /* GET home page. */
 router.get('/', function(req, res) {
