@@ -242,4 +242,19 @@ router.post('/sellToken', async function(req, res) {
   }
 })
 
+router.post('/cancelBuyOrder', async function(req, res) {
+  try {
+    await contract.methods.cancelBuyOrder(req.query.symbolName, req.query.orderIndex)
+                          .send({ from: req.query.addr, gas: 1000000 });
+
+    var response = await getBuyOrderBook(req.query.symbolName);
+    res.json(response);
+  } catch (error) {
+    console.log(error);
+    res.json({
+      msg: "Error cancelling buy order"
+    })
+  }
+})
+
 module.exports = router;
