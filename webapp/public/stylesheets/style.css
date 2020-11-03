@@ -1,10 +1,10 @@
 :root {
   --primary: #1fc76a;
   --primary-hover: #1AA658;
-  --buy: #F77B95;
-  --buy-light: #592739;
-  --sell: #20BCA4;
-  --sell-light: #0E4C48;
+  --sell: #F77B95;
+  --sell-light: #592739;
+  --buy: #20BCA4;
+  --buy-light: #0E4C48;
 }
 
 @media screen {
@@ -25,20 +25,19 @@
   }
 
   .main-dashboard {
-    color: white;
     border: 1px solid var(--primary);
     border-radius: 8px;
     box-shadow: 0 0 11px rgba(33,33,33,.2);
   }
 
   .buy-order-row {
-    color: var(--sell);
-    background-color: var(--sell-light);
+    color: var(--buy);
+    background-color: var(--buy-light);
   }
 
   .sell-order-row {
-    color: var(--buy);
-    background-color: var(--buy-light);
+    color: var(--sell);
+    background-color: var(--sell-light);
   }
 
   .btn-primary {
