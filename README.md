@@ -36,6 +36,7 @@ Steps to install:
 1. Clone this repository
 2. Run `npm install`
 3. Run `cd webapp && npm install`
+4. Run `trufle migrate` to deploy your contract to your blockchain network
 
 ## Usage
 
@@ -81,8 +82,22 @@ Steps to install:
     ```
 
 ### For local blockchain network
-1. Run `npm start` to get the server running
-2. Go to [localhost:3000](http://localhost:3000/)
+1. Add your local wallet to your metamask
+2. Add the 3 ERC20tokens to your Metamask wallet (Reference: [Adding custom tokens to Metamask](https://metamask.zendesk.com/hc/en-us/articles/360015489031-How-to-View-See-Your-Tokens-in-Metamask))
+
+    | Token Name | Contract Address                           | Symbol Name | Decimals |
+      |------------|--------------------------------------------|-------------|----------|
+      | AdrianCoin | (address of Token contract deployed) | ADC         | 8        |
+      | Bitconnect | (address of Token2 contract deployed) | BCC         | 8        |
+      | One Coin   | (address of Token3 contract deployed) | ONE         | 8        |
+
+3. Run `npm start` to get the server running
+4. Add the tokens to the exchange by calling these APIs in your console
+   - Note: To replace `XXX_CONTRACT_ADDRESS` and `WALLET_ADDRESS` with the respective addresses
+   - ADC: `curl -X POST localhost:3000/exchange/addToken?ecr20TokenAddress=ADRIANCOIN_CONTRACT_ADDRESS&symbolName=ADC&addr=WALLET_ADDRESS`
+   - BCC: `curl -X POST localhost:3000/exchange/addToken?ecr20TokenAddress=BITCONNECT_CONTRACT_ADDRESS&symbolName=BCC&addr=WALLET_ADDRESS`
+   - ONE: `curl -X POST localhost:3000/exchange/addToken?ecr20TokenAddress=ONECOIN_CONTRACT_ADDRESS&symbolName=ONE&addr=WALLET_ADDRESS`
+5. Go to [localhost:3000](http://localhost:3000/)
 
 ### For testnet (ropsten) network (Ignore)
 
