@@ -224,6 +224,38 @@ contract Exchange is owned {
 		return (indexes, prices, amounts);
 	}
 
+	
+	function getAccountBuyOrders(string memory symbolName) public view returns (uint[] memory, uint[] memory, uint[] memory) {
+		require(hasToken(symbolName));
+
+		uint8 _tokenIndex = getTokenIndex(symbolName);
+
+		(uint[] memory indexes, uint[] memory prices, uint[] memory amounts) = getBuyOrderBook(symbolName);
+		uint _accountOrdersCount = 0;
+
+		uint[] memory _tempIndexes = new uint[](tokens[_tokenIndex].buyOrderBook.ordersCount);
+
+		for (uint i = 0; i < tokens[_tokenIndex].buyOrderBook.ordersCount; i++) {
+			uint _orderIndex = indexes[i];
+			if (tokens[_tokenIndex].buyOrderBook.orders[_orderIndex].who == msg.sender) {
+				_tempIndexes[_accountOrdersCount] = _orderIndex;
+				_accountOrdersCount++;
+			}
+		}
+
+		uint[] memory _accountIndexes = new uint[](_accountOrdersCount);
+		uint[] memory _accountPrices = new uint[](_accountOrdersCount);
+		uint[] memory _accountAmounts = new uint[](_accountOrdersCount);
+
+		for (uint j = 0; j < _accountOrdersCount; j++) {
+			_accountIndexes[j] = _tempIndexes[j];
+			_accountPrices[j] = tokens[_tokenIndex].buyOrderBook.orders[_tempIndexes[j]].price;
+			_accountAmounts[j] = tokens[_tokenIndex].buyOrderBook.orders[_tempIndexes[j]].amount;
+		}
+
+		return (_accountIndexes, _accountPrices, _accountAmounts);
+	}
+
 
 	function getSellOrderBook(string memory symbolName) public view returns (uint[] memory, uint[] memory, uint[] memory) {
 		require(hasToken(symbolName));
