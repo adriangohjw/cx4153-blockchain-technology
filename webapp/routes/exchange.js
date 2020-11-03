@@ -9,7 +9,7 @@ var Web3 = require("web3");
 var exchange_artifact = require("../../build/contracts/Exchange.json");
 
 // set true for testnet / false for development
-if (true) {
+if (false) {
   // testnet
   var infuraWSS = `wss://ropsten.infura.io/ws/v3/6dbaa0a0eed5453ab2d7e585a6ff39b6`;
   var exchangeContractAddress = "0x641Ad5725E9C2AFb7f7936c3E45711E5dc08D3b5";
@@ -17,7 +17,7 @@ if (true) {
 else {
   // development
   var infuraWSS = `ws://localhost:7545`;
-  var exchangeContractAddress = "0xB4C0ed7Ad8616c450A688218eaFABE5f0a45Cdf8";
+  var exchangeContractAddress = "0x3aA417BCAfC38BC63A3871b40027F73d9e6802D7";
 }
 
 // setting up connection for web3
