@@ -363,8 +363,6 @@
     });
 
     await refreshOrderBooks();
-
-    alert("Buy order made");
   }
 
   async function sellToken() {
@@ -383,8 +381,6 @@
     });
 
     await refreshOrderBooks();
-
-    alert("Sell order made");
   }
 
   $('#selectpicker-token').on('change', async function(e) {
@@ -501,6 +497,14 @@
         button.classList.add("btn-sm");
         button.classList.add("buyTokenButton");
         button.innerHTML = "Cancel";
+        button.onclick = async function cancelBuyOrder() {
+          var symbolName = document.getElementById("selectpicker-token").value;
+          await fetch(`exchange/cancelBuyOrder?addr=${await getAccount()}&symbolName=${symbolName}&orderIndex=${button.id}`, {
+            method: 'POST',
+            credentials: 'same-origin'
+          });
+          refreshOrderBooks();
+        };
         cellTotal.appendChild(button);
       }
     }
