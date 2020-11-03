@@ -7,28 +7,24 @@ var Web3 = require("web3");
 
 // importing a compiled contract artifact which contains function signature etc. to interact
 var exchange_artifact = require("../../build/contracts/Exchange.json");
-var token_artifact = require("../../build/contracts/Token.json");
 
-// infura endpoint
-const infuraWSS = `wss://ropsten.infura.io/ws/v3/5a68d74b5a074d7ab6834c50c65773b9`; // To change to your own infura endpoint
-const local_WSS = `ws://localhost:7545`;
-
-// contract owner's address
-const OwnerAddress = "0xfC4E8AFeF7AD2a37DF8Ad0C3Ce038E4196501Fbe"; // To change to your own testnet wallet address
-const local_OwnerAddress = "0x791A190915d32b34b1C89Dc641889926fBB6A252"; // To change to your own local wallet address
-
-// contract address
-const ExchangeContractAddress = "0x1420180D527adfDcb7c17C8eA3a39C6b53b573Ab"; // To change to your own testnet contract address
-const local_ExchangeContractAddress = "0xA794DEbE2AE323c6583d7eB8C144891b76dd3084"; // To change to your own local contract address
-
-// testnet that contract is deployed on
-const Testnet = "ropsten";
+// set true for testnet / false for development
+if (true) {
+  // testnet
+  var infuraWSS = `wss://ropsten.infura.io/ws/v3/6dbaa0a0eed5453ab2d7e585a6ff39b6`;
+  var exchangeContractAddress = "0x641Ad5725E9C2AFb7f7936c3E45711E5dc08D3b5";
+}
+else {
+  // development
+  var infuraWSS = `ws://localhost:7545`;
+  var exchangeContractAddress = "0xB4C0ed7Ad8616c450A688218eaFABE5f0a45Cdf8";
+}
 
 // setting up connection for web3
 let web3 = new Web3(
-  Web3.currentProvider || new Web3.providers.WebsocketProvider(local_WSS)  // choose infuraWSS (ropsten testnet) / local_WSS (local)
+  Web3.currentProvider || new Web3.providers.WebsocketProvider(infuraWSS)  // choose infuraWSS (ropsten testnet) / local_WSS (local)
 );
-const contract = new web3.eth.Contract(exchange_artifact.abi, local_ExchangeContractAddress);  // choose ExchangeContractAddress (ropsten testnet) / local_ExchangeContractAddress (local)
+const contract = new web3.eth.Contract(exchange_artifact.abi, exchangeContractAddress);  // choose ExchangeContractAddress (ropsten testnet) / local_ExchangeContractAddress (local)
 
 async function getBuyOrderBook(symbolName) {
   var buyOrderBook = await contract.methods.getBuyOrderBook(symbolName).call();

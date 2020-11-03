@@ -1,19 +1,23 @@
 var express = require('express');
 var router = express.Router();
 
-// blockchain http address
-const infuraHttp = `https://mainnet.infura.io/v3/5a68d74b5a074d7ab6834c50c65773b9`; // To change to your own infura endpoint
-const local_Http = `http://localhost:7545`;
-
-// contract address
-const ExchangeContractAddress = "0x1420180D527adfDcb7c17C8eA3a39C6b53b573Ab"; // To change to your own testnet contract address
-const local_ExchangeContractAddress = "0xA794DEbE2AE323c6583d7eB8C144891b76dd3084"; // To change to your own local contract address
+// set true for testnet / false for development
+if (true) {
+  // testnet
+  var infuraHttp = `https://ropsten.infura.io/v3/6dbaa0a0eed5453ab2d7e585a6ff39b6`; // To change to your own infura endpoint
+  var exchangeContractAddress = "0x641Ad5725E9C2AFb7f7936c3E45711E5dc08D3b5";
+}
+else {
+  // development
+  var infuraHttp = `http://localhost:7545`;
+  var exchangeContractAddress = "0xB4C0ed7Ad8616c450A688218eaFABE5f0a45Cdf8";
+}
 
 /* GET home page. */
 router.get('/', function(req, res) {
   res.render('index', {
-    web3_http: local_Http,  // To change to infuraHttp for testnet
-    contract_address: local_ExchangeContractAddress // to change to ExchangeContractAddress for testnet
+    web3_http: infuraHttp,  // To change to infuraHttp for testnet
+    contract_address: exchangeContractAddress // to change to ExchangeContractAddress for testnet
   })
 });
 
